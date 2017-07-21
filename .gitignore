@@ -1,0 +1,3 @@
+vrTemplate/*.js
+vrTemplate/*.js.map
+!vrTemplate/babylon.js
