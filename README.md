@@ -12,12 +12,14 @@
   - npm 3.10.10: This will be automatically installed if you installed nodejs through the above link.
 
 ### Development
-  - Go to collect.vr/collect.vr (the root path would change later)
+  - Go to collect.vr/collect.vr (the root path would change later)  
+  - 'npm install' (first time only, run this once)
   - 'npm run dev'
   - This will generate bundle.js in collect.vr/public, and update whenever there is change on jsx or scss files
   - Open index.html
 
 ### Packaging
   - Go to collect.vr/collect.vr (the root path would change later)
+  - 'npm install' (first time only, run this once)
   - 'npm run build'
   - This will generate bundle.js in collect.vr/public, and update whenever there is change on jsx or scss files
