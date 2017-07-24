@@ -1,3 +1,5 @@
 vrTemplate/*.js
 vrTemplate/*.js.map
 !vrTemplate/babylon.js
+**/node_modules
+./collect.vr/src/client/public/**/*
