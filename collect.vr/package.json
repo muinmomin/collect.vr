@@ -1,0 +1,21 @@
+{
+  "name": "collect.vr",
+  "version": "1.0.0",
+  "description": "Edge extension for 3D collection.",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/muinmomin/collect.vr.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/muinmomin/collect.vr/issues"
+  },
+  "homepage": "https://github.com/muinmomin/collect.vr#readme"
+}
