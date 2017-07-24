@@ -28,7 +28,11 @@
             obj['ref'] = info.pageUrl;
             obj['type'] = '';
             obj['src'] = '';
-            if (info.srcUrl !== undefined) {
+            if (info.linkUrl !== undefined) {
+                  obj['src'] = info.linkUrl;
+                  obj['type'] = 'link';
+            }
+            else if (info.srcUrl !== undefined) {
                   obj['src'] = info.srcUrl;
                   var arr = obj['src'].split('.');
                   if (arr[arr.length - 1] === 'gltf') {
@@ -42,15 +46,13 @@
                   obj['src'] = info.selectionText;
                   obj['type'] = 'text';
             }
-            else if (info.linkUrl !== undefined) {
-                  obj['src'] = info.linkUrl;
-                  obj['type'] = 'link';
-            }
+            
             console.log(obj);
 
-            var collections = localStorage.getItem(COLLECTION_KEY) ? localStorage.getItem(COLLECTION_KEY) : [];
-            collections.push(obj);
-            localStorage.setItem(COLLECTION_KEY, collections);
+            var collections = localStorage.getItem(COLLECTION_KEY) ? localStorage.getItem(COLLECTION_KEY) : '[]';
+            var oldCollections = JSON.parse(collections);
+            oldCollections.push(obj);
+            localStorage.setItem(COLLECTION_KEY, JSON.stringify(oldCollections));
       });
 
 })();
