@@ -46,10 +46,6 @@
                   obj['type'] = 'link';
             }
             console.log(obj);
-            
-            if (!localStorage.getItem(COLLECTION_KEY)) {
-
-            }
 
             var collections = localStorage.getItem(COLLECTION_KEY) ? localStorage.getItem(COLLECTION_KEY) : [];
             collections.push(obj);
