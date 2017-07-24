@@ -2,6 +2,7 @@ class Game {
   private _canvas: any;//HTMLCanvasElement;
   private _engine: BABYLON.Engine;
   private _scene: BABYLON.Scene;
+  private _webVrCamera: BABYLON.WebVRFreeCamera;
   private _camera: BABYLON.FreeCamera;
   private _light: BABYLON.Light;
 
@@ -29,7 +30,8 @@ class Game {
 
     if (headset) {
       // Create a WebVR camera with the trackPosition property set to false so that we can control movement with the gamepad
-      this._camera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, -10), this._scene, { trackPosition: false });
+      this._camera = this._webVrCamera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, -10), this._scene, { trackPosition: false });
+      
       //this._camera.deviceScaleFactor = 1;
     } else {
       // create a FreeCamera, and set its position to (x:0, y:5, z:-10)
@@ -46,8 +48,20 @@ class Game {
       console.log("down")
       this._scene.onPointerDown = undefined
       this._camera.attachControl(this._canvas, true);
-    }
+      
+      if (this._webVrCamera !== null) {
+        this._webVrCamera.controllers.forEach((gp) => {
+          console.log('Found a gamepad: ' + gp.id);
+          // Hacky mc hackface
+          let vendorName = (gp.id || '').indexOf('Spatial Controller') != 0 ? 'wmr' : 'generic';
+          let meshName = gp.hand === 'left' ? 'CK_Left.glb' : 'CK_Right.glb';
 
+          this.loadMesh('./', 'assets/controllers/'+vendorName+'/'+meshName).then((mesh: BABYLON.Mesh) => {
+            gp.attachToMesh(mesh);
+          });
+        });
+      }
+    };
 
     // target the camera to scene origin
     this._camera.setTarget(BABYLON.Vector3.Zero());
@@ -58,9 +72,7 @@ class Game {
     // BABYLON.SceneLoader.Load("./glTF-Sample-Models/2.0/Duck/glTF-Embedded", "duck.gltf", this._engine, function (scene) { 
     //   console.log(scene)
     //   // do somethings with the scene
-    // });
-
-   
+    // });   
 
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     this._light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), this._scene);
@@ -88,7 +100,17 @@ class Game {
     let ground = BABYLON.MeshBuilder.CreateGround('ground1',
       { width: 6, height: 6, subdivisions: 2 }, this._scene);
   }
+    
+  async loadMesh(rootUrl: string, sceneFilename: any): Promise<BABYLON.Mesh> {
 
+    // TODO: Travis imlement this :)
+    let box = BABYLON.Mesh.CreateBox("sphere1", 0.1, this._scene);
+    box.scaling.copyFromFloats(2, 1, 2);
+    box.material = new BABYLON.StandardMaterial('right', this._scene);
+
+    return Promise.resolve(box);
+  }
+  
   animate(): void {
     // run the render loop
     this._engine.runRenderLoop(() => {
