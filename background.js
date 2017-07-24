@@ -1,3 +1,5 @@
 browser.browserAction.onClicked.addListener(function(tab) {
-      alert("Hello!");
+      // var creating = browser.tabs.create({
+      //       url: "vrTemplate/helloworld.html"
+      // });   //promise
 });

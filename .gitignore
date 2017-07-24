@@ -5,3 +5,4 @@ vrTemplate/*.js.map
 **/node_modules
 ./.collect.vr/public
 .vscode
+.vs/*
