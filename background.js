@@ -1,3 +1,9 @@
+browser.runtime.onInstalled.addListener((details) => {
+      var creating = browser.tabs.create({
+             url: "firstrun.html"
+       });
+});
+
 browser.contextMenus.create({
     id: "collect",
     title: "Collect",
@@ -15,6 +21,6 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
             alert(info.selectionText);
       }
       else {
-            
+
       }
 });
