@@ -33,7 +33,7 @@ class Game {
       //this._camera.deviceScaleFactor = 1;
     } else {
       // create a FreeCamera, and set its position to (x:0, y:5, z:-10)
-      this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 5, -10), this._scene);
+      this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 1.5, -10), this._scene);
 
       //  this._camera = new BABYLON.ArcRotateCamera("camera", 4.712, 1.571, 0.05, BABYLON.Vector3.Zero(), this._scene);
       //   this._camera.attachControl(this._canvas, true);
@@ -75,6 +75,14 @@ class Game {
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     skybox.material = skyboxMaterial;
 
+    // create the ground (round platform)
+    var groundMaterial = new BABYLON.StandardMaterial("ground", this._scene);
+    groundMaterial.diffuseTexture = new BABYLON.Texture("textures/polar_grid.png", this._scene);
+    var ground = BABYLON.Mesh.CreateCylinder("ground", 0.1, 3, 3, 100, 10, this._scene);
+    // the user should see the ground below
+    ground.position = new BABYLON.Vector3(0, 0, -10);
+    ground.material = groundMaterial;
+
     // // create a built-in "sphere" shape; with 16 segments and diameter of 2
     // let sphere = BABYLON.MeshBuilder.CreateSphere('sphere1',
     //   { segments: 16, diameter: 2 }, this._scene);
@@ -93,10 +101,6 @@ class Game {
     }, null, function (scene) {
         console.log("error");
     })
-
-    // create a built-in "ground" shape
-    let ground = BABYLON.MeshBuilder.CreateGround('ground1',
-      { width: 6, height: 6, subdivisions: 2 }, this._scene);
   }
 
   animate(): void {
