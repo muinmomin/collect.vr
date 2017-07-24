@@ -8,7 +8,7 @@
 
 ## 2D APP
 ### Prerequisite
-  - [NodeJS v6.11.1]: (https://nodejs.org/en/)
+  - [NodeJS v6.11.1](https://nodejs.org/en/)
   - npm 3.10.10: This will be automatically installed if you installed nodejs through the above link.
 
 ### Development
