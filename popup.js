@@ -4,4 +4,4 @@ window.addEventListener('click',function(e){
              url: e.target.href
        });   //promise
   }
-})
+});
