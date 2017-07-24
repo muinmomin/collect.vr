@@ -1,43 +1,55 @@
-(function(){
+(function () {
+
+      var COLLECTION_KEY = 'collections';
 
       browser.runtime.onInstalled.addListener((details) => {
-      var creating = browser.tabs.create({
-             url: "firstrun.html"
-       });
-});
+            var creating = browser.tabs.create({
+                  url: 'firstrun.html'
+            });
+      });
 
-browser.contextMenus.create({
-    id: "collect",
-    title: "Collect",
-    contexts: ['all']
-});
+      browser.contextMenus.create({
+            id: 'collect',
+            title: 'Collect',
+            contexts: ['all']
+      });
 
-browser.contextMenus.onClicked.addListener((info, tab) => {
-      // check if collections is defined in local storage
-      if(!localStorage)
-      {
-            alert("Browser not supported!");
-            return;
-      }
-      
+      // Captures data from right click and saves to local storage.
+      browser.contextMenus.onClicked.addListener((info, tab) => {
 
-      if (info.srcUrl !== undefined) {
-            var arr = info.srcUrl.split('.');
-            var type = "2d"
-            if (arr[arr.length-1] === 'gltf') {
-                  type = "3d";
+            if (!localStorage) {
+                  alert('Browser not supported!');
+                  return;
             }
-            alert(info.srcUrl + ": " + type);
-      }
-      else if (info.linkUrl !== undefined) {
-            alert(info.linkUrl);     
-      }
-      else if (info.selectionText !== undefined) {
-            alert(info.selectionText);
-      }
-      else {
 
-      }
-});
+            var obj = {};
+            obj['id'] = new Date().getTime();
+            obj['ref'] = info.pageUrl;
+            obj['type'] = '';
+            obj['src'] = '';
+            if (info.srcUrl !== undefined) {
+                  obj['src'] = info.srcUrl;
+                  var arr = obj['src'].split('.');
+                  if (arr[arr.length - 1] === 'gltf') {
+                        obj['type'] = '3d';
+                  }
+                  else {
+                        obj['type'] = '2d';
+                  }
+            }
+            else if (info.selectionText !== undefined) {
+                  obj['src'] = info.selectionText;
+                  obj['type'] = 'text';
+            }
+            else if (info.linkUrl !== undefined) {
+                  obj['src'] = info.linkUrl;
+                  obj['type'] = 'link';
+            }
+            console.log(obj);
+
+            var collections = localStorage.getItem(COLLECTION_KEY) ? localStorage.getItem(COLLECTION_KEY) : [];
+            collections.push(obj);
+            localStorage.setItem(COLLECTION_KEY, collections);
+      });
 
 })();

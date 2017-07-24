@@ -11,6 +11,28 @@ class Game {
     this._engine = new BABYLON.Engine(this._canvas, true);
   }
 
+  async loadModel(root, name):Promise<BABYLON.Mesh>{
+    var p:Promise<BABYLON.Mesh> = new Promise((res, rej)=>{
+      var parent = new BABYLON.Scene(this._engine)
+      BABYLON.SceneLoader.ImportMesh(null, root, name, this._scene, function (meshses) {
+        var parent = new BABYLON.Mesh("", this._scene)
+        meshses.forEach((m)=>{
+          //console.log(m.parent == this._scene)
+          if(m.parent == this._scene){
+            console.log("hit")
+            parent.addChild(m)
+            //m.parent = parent
+          }
+        })
+        res(parent);
+      }, null, function (scene) {
+          rej("failed to load model")
+      })
+      var m = new BABYLON.Mesh(null,null);
+    });
+    return p;
+  }
+
   async createScene() {
     // create a basic BJS Scene object
     this._scene = new BABYLON.Scene(this._engine);
@@ -84,15 +106,11 @@ class Game {
     //   BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING
     
     //BABYLON.SceneLoader.ImportMesh()
-    BABYLON.SceneLoader.Append("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF/", "BoomBox.gltf", this._scene, function (scene) {
-      console.log("success")
-      var m = scene.meshes[scene.meshes.length - 1]
-      m.scaling.x = 100
-      m.scaling.y = 100
-      m.scaling.z = 100
-    }, null, function (scene) {
-        console.log("error");
-    })
+    for(var i = 0;i<5;i++){
+      var meshName = "Duck"
+      var parent = await this.loadModel("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/"+meshName+"/glTF/", meshName+".gltf")
+      parent.position.x = 2*i
+    }
 
     // create a built-in "ground" shape
     let ground = BABYLON.MeshBuilder.CreateGround('ground1',
