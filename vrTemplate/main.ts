@@ -114,10 +114,37 @@ class Game {
     //   BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING
     
     //BABYLON.SceneLoader.ImportMesh()
-    for(var i = 0;i<5;i++){
-      var meshName = "Duck"
+    var objectCount = 5
+    for(var i = 0;i<objectCount;i++){
+      var meshName = Math.random() > 0.5 ? "Duck" : "Avocado"
       var parent = await this.loadModel("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/"+meshName+"/glTF/", meshName+".gltf")
-      parent.position.x = 2*i
+      
+      var size = 0
+      var bottom = Infinity
+
+      //Try to get object x size and bottom y pos
+      parent.getChildMeshes().forEach((c)=>{
+        var diff = c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x
+        var bottomY = c.getBoundingInfo().boundingBox.minimum.y+c.position.y
+        if(isFinite(diff) && diff !=0){
+          size = Math.max(size, c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x)
+          bottom = Math.min(bottom, bottomY)
+        }
+      })
+      //TODO bottom is incorrect?
+      console.log(bottom)
+      
+      //Put objects randomly in arc in from of camera
+      parent.position.y = 1+Math.random()*1
+      var rot = -Math.PI/2+(Math.PI*Math.random())
+      parent.position.x = this._camera.position.x + (Math.sin(rot)*5)//2*(i-objectCount/2)
+      parent.position.z = this._camera.position.z + (Math.cos(rot)*5)
+
+      //Scale to be same size
+      var desiredSize = 1
+      parent.scaling.x = desiredSize/size
+      parent.scaling.y = desiredSize/size
+      parent.scaling.z = desiredSize/size
     }
   }
 
