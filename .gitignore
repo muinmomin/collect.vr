@@ -3,4 +3,5 @@ vrTemplate/*.js.map
 !vrTemplate/babylon.js
 !vrTemplate/babylon.glTFFileLoader.js
 **/node_modules
-./collect.vr/src/public/**/*
+./.collect.vr/public
+.vscode

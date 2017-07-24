@@ -1,9 +1,10 @@
 import React from 'react';
 import {render} from 'react-dom';
+import style from './index.scss';
 
 class App extends React.Component {
   render () {
-    return <p> Hello React!</p>;
+    return <div className='example'><h1> Hello React!</h1></div>;
   }
 }
 
