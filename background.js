@@ -14,4 +14,7 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
       else if (info.selectionText !== undefined) {
             alert(info.selectionText);
       }
+      else {
+            
+      }
 });
