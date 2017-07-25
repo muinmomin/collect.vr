@@ -1,21 +1,25 @@
 class Space {
-  public _id;
-  public _src;
-  public _title;
-  public _collections;
+  public _id: number;
+  public _src: number;
+  public _title: string;
+  public _collections: Array<number>;
+  private _database: 'collections';
 
   // TODO: constructor with localstorage
+  constructor() {
+    var collections = localStorage.getItem(COLLECTION_KEY) ? localStorage.getItem(COLLECTION_KEY) : [];
+  }
 
   // TODO: override default getter and setter.
 }
 
 class Item {
-  public _id;
-  public _x;
-  public _y;
-  public _z;
-  public _scale;
-  public _rotation; 
+  public _id: number;
+  public _x: number;
+  public _y: number;
+  public _z: number;
+  public _scale: number;
+  public _rotation: number; 
 
   //TODO: constructor with localStorage 
 
