@@ -45,15 +45,17 @@ class Space {
 
   // TODO: constructor with localstorage
   constructor() {
-    var collectionsStr = localStorage.getItem(this.COLLECTION_KEY);
-    var collectionsJSON = JSON.parse(collectionsStr);
+    // var collectionsStr = localStorage.getItem(this.COLLECTION_KEY);
+    // var collectionsJSON = JSON.parse(collectionsStr);
 
-    this._length = collectionsJSON.length;
+    // this._length = collectionsJSON.length;
 
-    for (var i = 0; i < collectionsJSON.length; ++i) {
-      var collectedObject = new CollectedObject(collectionsJSON[i].type, collectionsJSON[i].src);
-      this._objectMap[collectedObject.uniqueID] = collectedObject;
-    }
+    // for (var i = 0; i < collectionsJSON.length; ++i) {
+    //   var collectedObject = new CollectedObject(collectionsJSON[i].type, collectionsJSON[i].src);
+    //   this._objectMap[collectedObject.uniqueID] = collectedObject;
+    // }
+    var collectedObject = new CollectedObject("3D", "docs/assets/Atom01.glb")
+    this._objectMap[collectedObject.uniqueID] = collectedObject;
 
   }
 
@@ -375,7 +377,7 @@ class Game {
     //var objects:Array<CollectedObject> = []
     // var objectCount = 5
     // for (var i = 0; i < objectCount; i++) {
-    //   objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
+    //   objects.push(new CollectedObject("3D", "docs/assets/Atom01.glb"))
     // }
     // for (var i = 5; i < 10; i++) {
     //   objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
