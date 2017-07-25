@@ -6,7 +6,7 @@ class Game {
   private _camera: BABYLON.FreeCamera;
   private _light: BABYLON.Light;
   private _cursor: BABYLON.Mesh;
-  private _meshUnderGaze: BABYLON.AbstractMesh;
+  private _gazeTarget: SelectedObject;
 
   constructor(canvasElement: string) {
     // Create canvas and engine
@@ -15,8 +15,6 @@ class Game {
 
     // TODO: A total hack here since we aren't bundling the controller models in our custom babylon build
     BABYLON['windowsControllerSrc'] = '/vrTemplate/assets/controllers/wmr/';
-
-    this._meshUnderGaze = undefined;
   }
 
   async loadModel(root, name): Promise<BABYLON.Mesh> {
@@ -42,7 +40,19 @@ class Game {
     return p;
   }
 
+  createCursor() {
+    var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
+    cursorMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
+
+    this._cursor = BABYLON.Mesh.CreateSphere("cursor", 10, 0.3, this._scene);
+    this._cursor.material = cursorMaterial;
+    this._cursor.isPickable = false;
+  }
+
   updateCursor() {
+    if (!this._cursor)
+      return;
+
     var forward = new BABYLON.Vector3(0, 0, -1);
     forward = vecToLocal(forward, this._camera);
     var origin = this._camera.globalPosition;
@@ -61,39 +71,67 @@ class Game {
       this._cursor.position = this._camera.getFrontPosition(length);
 
       // gaze removed from an object
-      if (this._meshUnderGaze) {
-        this.removeObjectHighlight(this._meshUnderGaze);
-        this._meshUnderGaze = undefined;
+      if (this._gazeTarget.mesh) {
+        this.removeObjectHighlight(this._gazeTarget);
+        this._gazeTarget.mesh = undefined;
       }
     } else {
       // selection cursor
       this._cursor.position = hit.pickedPoint;
 
       // gaze sees a new object
-      if (!this._meshUnderGaze || this._meshUnderGaze != hit.pickedMesh) {
-        this._meshUnderGaze = hit.pickedMesh;
-        this.addObjectHighlight(this._meshUnderGaze);
+      if (!this._gazeTarget.mesh || this._gazeTarget.mesh != hit.pickedMesh) {
+        this._gazeTarget.mesh = hit.pickedMesh;
+        this.addObjectHighlight(this._gazeTarget);
       }
     }
   }
 
-  removeObjectHighlight(mesh) {
-    if (!mesh || !mesh.name) {
-      console.error("Can't hightlight mesh: " + mesh);
+  removeObjectHighlight(selectedObject) {
+    if (!selectedObject.mesh || !selectedObject.mesh.name) {
+      console.error("Can't hightlight mesh: " + selectedObject);
       return;
     }
 
-    console.debug("hideMenuOptions for: " + mesh.name);
+    console.debug("hideMenuOptions for: " + selectedObject.mesh.name);
   }
 
-  addObjectHighlight(mesh) {
-    if (!mesh || !mesh.name) {
-      console.error("Can't hightlight mesh: " + mesh);
+  addObjectHighlight(selectedObject) {
+    if (!selectedObject.mesh || !selectedObject.mesh.name) {
+      console.error("Can't hightlight mesh: " + selectedObject);
       return;
     }
 
     // getObjectDetails(mesh.name);
-    console.debug("showMenuOptions for: " + mesh.name);
+    console.debug("showMenuOptions for: " + selectedObject.mesh.name);
+  }
+
+  toggleZoomObjectMode() {
+    if (!this._gazeTarget.mesh) {
+      console.debug("No object picked");
+      return;
+    }
+
+    var mesh = this._gazeTarget.mesh;
+
+    if (this._cursor) {
+      // zoom in
+      this._gazeTarget.positionInCollection = mesh.position;
+      mesh.setAbsolutePosition(this._camera.getFrontPosition(this._gazeTarget.GetZoomDistanceToCam()));
+      //mesh.scaling = new BABYLON.Vector3(5, 5, 5); - changes the object position weirdly
+
+      // turn off the cursor
+      this._cursor.dispose();
+      this._cursor = undefined;
+    }
+    else {
+      // zoom out
+      //mesh.scaling = new BABYLON.Vector3(1, 1, 1);
+      mesh.position = this._gazeTarget.positionInCollection;
+
+      // turn on the cursor back
+      this.createCursor();
+    }
   }
 
   async createScene() {
@@ -112,7 +150,7 @@ class Game {
 
     if (headset) {
       // Create a WebVR camera with the trackPosition property set to false so that we can control movement with the gamepad
-      this._camera = this._webVrCamera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, 0), this._scene, { trackPosition: true });
+      this._camera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, 0), this._scene, { trackPosition: true });
 
       //this._camera.deviceScaleFactor = 1;
     } else {
@@ -130,18 +168,18 @@ class Game {
       console.log("down")
       this._scene.onPointerDown = undefined
       this._camera.attachControl(this._canvas, true);
-      this._cursor = BABYLON.Mesh.CreateSphere("cursor", 10, 0.3, this._scene);
-      var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
-      cursorMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
-      this._cursor.material = cursorMaterial;
-      this._cursor.isPickable = false;
-      
+
+      this.createCursor();      
       this._scene.registerBeforeRender(() => { this.updateCursor(); });
     };
 
     window.addEventListener('keydown', (eventArg) => {
       if (eventArg.key == '`')
         this._scene.debugLayer.show();
+
+      if (eventArg.key == ' ') {
+        this.toggleZoomObjectMode();
+      }
     });
 
     // target the camera to scene origin
@@ -177,6 +215,8 @@ class Game {
     ground.position = new BABYLON.Vector3(0, -1.5, -10);
     ground.material = groundMaterial;
     ground.isPickable = false;
+
+    this._gazeTarget = new SelectedObject();
 
     // // create a built-in "sphere" shape; with 16 segments and diameter of 2
     // let sphere = BABYLON.MeshBuilder.CreateSphere('sphere1',
@@ -253,6 +293,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* Utilities */
+class SelectedObject {
+  public GetZoomDistanceToCam(): number {
+    return 2; // we might want to calculate based on the object size
+  }
+
+  public mesh: BABYLON.AbstractMesh;
+  public positionInCollection: BABYLON.Vector3;
+}
+
 var vecToLocal = function (vector, mesh): BABYLON.Vector3 {
   var m = mesh.getWorldMatrix();
   var v = BABYLON.Vector3.TransformCoordinates(vector, m);
