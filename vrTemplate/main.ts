@@ -96,19 +96,19 @@ class Game {
       console.log("down")
       this._scene.onPointerDown = undefined
       this._camera.attachControl(this._canvas, true);
-      // this.loadModel('./', 'assets/controllers/wmr/CK_Left.glb')
-      // if (this._webVrCamera) {
-      //   this._webVrCamera.controllers.forEach((gp) => {
-      //     console.log('Found a gamepad: ' + gp.id);
-      //     // Hacky mc hackface
-      //     let vendorName = (gp.id || '').indexOf('Spatial Controller') != 0 ? 'wmr' : 'generic';
-      //     let meshName = gp.hand === 'left' ? 'CK_Left.glb' : 'CK_Right.glb';
+      this.loadModel('/vrTemplate/', 'assets/controllers/wmr/CK_Left.glb')
+      if (this._webVrCamera) {
+        this._webVrCamera.controllers.forEach((gp) => {
+          console.log('Found a gamepad: ' + gp.id);
+          // Hacky mc hackface
+          let vendorName = (gp.id || '').indexOf('Spatial Controller') != 0 ? 'wmr' : 'generic';
+          let meshName = gp.hand === 'left' ? 'CK_Left.glb' : 'CK_Right.glb';
 
-      //     this.loadModel('./', 'assets/controllers/'+vendorName+'/'+meshName).then((mesh: BABYLON.Mesh) => {
-      //       gp.attachToMesh(mesh);
-      //     });
-      //   });
-      // }
+          this.loadModel('/vrTemplate/', 'assets/controllers/'+vendorName+'/'+meshName).then((mesh: BABYLON.Mesh) => {
+            gp.attachToMesh(mesh);
+          });
+        });
+      }
     };
 
     window.addEventListener('keydown', (eventArg) => {
