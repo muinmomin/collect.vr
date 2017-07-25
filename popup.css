@@ -1,5 +1,84 @@
+body
+{
+    background-color:#F2F2F2;
+}
+
+button
+{
+    background-color:transparent;
+    border:none;
+    font-family: "Segoe UI";
+    font-size: 1.25em;
+}
+
 #main
 {
-    height: 400px;
     width: 300px;
+}
+
+#your-space
+{
+    font-weight: bold;
+    font-family: "Segoe UI";
+    font-size:1.25em;
+}
+#bottom-buttons
+{
+    background: none;
+}
+#delete
+{
+    float:right;
+    padding-right:10px;
+}
+#share
+{
+    float:right;
+}
+#view-2d
+{
+    margin-left: 19.6%;
+    padding-right:0;
+}
+#launch-vr
+{
+    padding-left:0;
+}
+#content
+{
+    background-color:lightgray;
+    padding-left: 10%;
+    padding-right:10%;
+    text-align: center;
+}
+.content-text
+{
+    font-family: "Segoe UI";
+    color:gray;
+}
+
+.content-text-small
+{
+    font-size: .75em;
+}
+
+#right-click-icon
+{
+    height:100px;
+    width:100px;
+    filter:opacity(20%);
+}
+#new-tab-icon
+{
+    padding-right: 5px;
+    height:20px;
+    width:20px;
+    float:left;
+}
+#web-vr-icon
+{
+    padding-right:5px;
+    height:20px;
+    width:30px;
+    float:left;
 }
