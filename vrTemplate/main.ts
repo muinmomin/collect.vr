@@ -173,9 +173,28 @@ class Game {
     if (!this._cursor)
       return;
 
+    var vrPoseOrientation:BABYLON.Quaternion;
+    if (this._webVrCamera) {
+      vrPoseOrientation = new BABYLON.Quaternion(
+            this._webVrCamera.rawPose.orientation[1],
+            this._webVrCamera.rawPose.orientation[0],
+            this._webVrCamera.rawPose.orientation[2],
+            this._webVrCamera.rawPose.orientation[3]
+          );
+    }
+
     var forward = new BABYLON.Vector3(0, 0, -1);
     forward = vecToLocal(forward, this._camera);
-    var origin = this._camera.globalPosition;
+    if (this._webVrCamera) {
+      var rotMx:BABYLON.Matrix;
+      vrPoseOrientation.toRotationMatrix(rotMx);
+      forward = BABYLON.Vector3.TransformCoordinates(forward, rotMx);
+    }
+
+    var origin = this._camera.position;
+    if (this._webVrCamera) {
+      origin = origin.add(this._webVrCamera.devicePosition);
+    }
 
     var direction = forward.subtract(origin);
     direction = BABYLON.Vector3.Normalize(direction);
@@ -189,6 +208,9 @@ class Game {
     if (!hit || !hit.pickedMesh) {
       // draw cursor no selection
       this._cursor.position = this._camera.getFrontPosition(length);
+      if (this._webVrCamera) {
+        this._cursor.position = origin.add(direction.scale(length));
+      }
 
       // gaze removed from an object
       if (this._gazeTarget.mesh) {
@@ -284,7 +306,7 @@ class Game {
 
     if (headset) {
       // Create a WebVR camera with the trackPosition property set to false so that we can control movement with the gamepad
-      this._camera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, 0), this._scene, { trackPosition: true });
+      this._camera = this._webVrCamera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, 0), this._scene, { trackPosition: true });
 
       //this._camera.deviceScaleFactor = 1;
     } else {
