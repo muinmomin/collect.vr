@@ -78,6 +78,7 @@ class Game {
     this._engine = new BABYLON.Engine(this._canvas, true);
 
     this._show3dButton.addEventListener('click', () => {
+      console.log('show 3d button clicked');
       this.show3d();
     });
     
