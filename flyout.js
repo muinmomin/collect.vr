@@ -6,4 +6,5 @@ window.onload = function(){
       div.appendChild(button);
       div.style.cssText = "position:fixed; right:5%; top:5%; border:1;";
       window.document.body.appendChild(div);
+      jQuery("body").append("<p>test2</p>");
 };
