@@ -1,3 +1,7 @@
+class CollectedObject {
+  
+}
+
 class Game {
   private _canvas: any;//HTMLCanvasElement;
   private _engine: BABYLON.Engine;
@@ -229,7 +233,7 @@ class Game {
     //BABYLON.SceneLoader.ImportMesh()
     var objectCount = 5
     for (var i = 0; i < objectCount; i++) {
-      var meshName = Math.random() > 0.5 ? "Molecule" : "Molecule"
+      var meshName = Math.random() > 0.5 ? "Avocado" : "Avocado"
       var parent = await this.loadModel("/docs/assets/", meshName + ".glb")
 
       var size = 0
