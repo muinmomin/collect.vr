@@ -33,6 +33,9 @@ class Game {
   private _cursor: BABYLON.Mesh;
   private _gazeTarget: SelectedObject;
   private objectJump=.8;
+  private rotationXState=0;
+  private rotationYState=0;
+  private ray: BABYLON.Ray;
 
   constructor(canvasElement: string) {
     // Create canvas and engine
@@ -88,8 +91,8 @@ class Game {
 
     var length = 30;
 
-    var ray = new BABYLON.Ray(origin, direction, length);
-   
+    this.ray = new BABYLON.Ray(origin, direction, length);
+   var ray = this.ray
     var hit = this._scene.pickWithRay(ray, null);
 
     if (!hit || !hit.pickedMesh) {
@@ -204,23 +207,46 @@ class Game {
       if (eventArg.key == ' ') {
         this.toggleZoomObjectMode();
       }
-      if((eventArg.keyCode == 85 || eventArg.keyCode==68) && this._gazeTarget){
+      if((eventArg.keyCode == 85 || eventArg.keyCode==74) && this._gazeTarget){
         var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
         while(mesh.parent != null){
           var other:any = mesh.parent
           mesh = other
         }
-        let v=new BABYLON.Vector3(0,0,this.objectJump);
+        //let v=new BABYLON.Vector3(0,0,this.objectJump);
+        var v = this.ray.direction.clone().normalize()//.multiplyByFloats(0.8,)
 
         if((eventArg.keyCode==85)){
-          v.z*=-1;
+          //v.z*=-1;
+          v=v.multiplyByFloats(-1,-1,-1);
         }
-        console.log(v);
-        console.log(mesh.position);
-        mesh.position.z+=v.z;
-        console.log(mesh.position);
+
+        mesh.position.addInPlace(v)
         }
+
+        if (eventArg.keyCode==87){ //up aka w
+          this.rotationXState=1;
+        }
+          if(eventArg.keyCode==65){ //left aka a
+            this.rotationYState=-1;
+          }
+          if(eventArg.keyCode==83){ //down aka s
+            this.rotationXState=-1;
+          }
+          if(eventArg.keyCode==68){  //right aka d
+            this.rotationYState=1;
+          } 
     });
+        window.addEventListener('keyup', (eventArg) =>{
+         
+        if (eventArg.keyCode==87||eventArg.keyCode==83){ //up or down
+          this.rotationXState=0;
+        }
+          if(eventArg.keyCode==65||eventArg.keyCode==68
+          ){ //left or right
+            this.rotationYState=0;
+          }
+          });
 
     // target the camera to scene origin
     this._camera.setTarget(BABYLON.Vector3.Zero());
@@ -303,7 +329,38 @@ class Game {
   animate(): void {
     // run the render loop
     this._engine.runRenderLoop(() => {
+      if(this._gazeTarget.mesh&&(this.rotationXState!=0||this.rotationYState!=0)){
+        let v: BABYLON.Vector3;
+        var forward = this.ray.direction;
+        let up=BABYLON.Vector3.Cross(BABYLON.Vector3.Cross(new BABYLON.Vector3(0,1,0), forward), forward)
+        let side=BABYLON.Vector3.Cross(forward, up);
+        if(this.rotationXState==1){
+          v=new BABYLON.Vector3(0.105, 0, 0);
+        this._gazeTarget.mesh.rotate(side, .105, BABYLON.Space.WORLD);
+
+        }
+        if(this.rotationXState==-1){
+          v=new BABYLON.Vector3(-.105,0,0);
+        this._gazeTarget.mesh.rotate(side, -.105, BABYLON.Space.WORLD);
+
+        }
+        if(this.rotationYState==1){
+          v=new BABYLON.Vector3(0, .105, 0);
+                  this._gazeTarget.mesh.rotate(up, .105, BABYLON.Space.WORLD);
+
+        }
+        if(this.rotationYState==-1){
+          v=new BABYLON.Vector3(0, -.105, 0);
+        this._gazeTarget.mesh.rotate(up, -.105, BABYLON.Space.WORLD);
+
+        }
+        //v = vecToLocal(v, this._camera);
+        //this._gazeTarget.mesh.rotation.x+=v.x;
+        //this._gazeTarget.mesh.rotation.y+=v.y;
+        //this._gazeTarget.mesh.rotate(this.ray.direction, .105, BABYLON.Space.WORLD);
+      }
       this._scene.render();
+      
     });
 
     // the canvas/window resize event handler
