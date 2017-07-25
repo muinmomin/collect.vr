@@ -1,13 +1,4 @@
 class CollectedObject {
-  guid() {
-    function s4() {
-      return Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-      s4() + '-' + s4() + s4() + s4();
-  }
   id:number
   ref: string
   title: string
@@ -18,9 +9,53 @@ class CollectedObject {
     z:number
   }
   mesh:BABYLON.Mesh
-  constructor(public type:string, public src:string){
+  COLLECTION_KEY = 'collections';
+
+  constructor(public fileType:string, public src:string){
     this.uniqueID = this.guid()
+
+    localStorage.getItem(this.COLLECTION_KEY);
   }
+
+  // Generate unique ID. 
+  guid() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+      s4() + '-' + s4() + s4() + s4();
+  }
+}
+
+class Item {
+  public _id: number;
+  public _x: number;
+  public _y: number;
+  public _z: number;
+  public _scale: number;
+  public _rotation: number; 
+
+  //TODO: constructor with localStorage 
+
+  //TODO: override default getter and setter.
+}
+class Space {
+  public _id: number;
+  public _src: number;
+  public _title: string;
+  public _collectionsId: Array<number>;
+  private _database: 'collections';
+
+  // TODO: constructor with localstorage
+  constructor() {
+    var collectionsJSON = localStorage.getItem(this._database);
+    
+  }
+
+  // TODO: override default getter and setter.
 }
 
 class Game {
@@ -43,7 +78,21 @@ class Game {
     // TODO: A total hack here since we aren't bundling the controller models in our custom babylon build
     BABYLON['windowsControllerSrc'] = '/vrTemplate/assets/controllers/wmr/';
   }
-  
+
+  // load accepts png file and glb file.
+  async load(root, name):Promise<BABYLON.Mesh> {
+      var fileExtension = name.split('.').pop();
+      
+      if (fileExtension == 'png') {
+        return this.loadImage(root, name)
+      } else {
+        return this.loadModel(root, name)
+      }
+  }
+
+  // Load 3D model. 
+  // root: /
+  // name: source of the file. 
   async loadModel(root, name): Promise<BABYLON.Mesh> {
     var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
       var parent = new BABYLON.Scene(this._engine)
@@ -66,6 +115,30 @@ class Game {
     });
     return p;
   }
+
+  // loadImage assumes the file format is .png
+  async loadImage(root, name): Promise<BABYLON.Mesh> {
+    var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
+      var filename = name.slice(0, -4);
+      var planeName = filename + 'Plane';
+      var srcPath = '/' + name; 
+      const size = 1.0;  /* Scaling factor for the image is called size. */  
+      var imageMaterial = new BABYLON.StandardMaterial(filename, this._scene);
+      var image = BABYLON.Mesh.CreatePlane(planeName, size, this._scene, false, BABYLON.Mesh.DEFAULTSIDE);
+
+      imageMaterial.diffuseTexture = new BABYLON.Texture(srcPath, this._scene);
+      // image.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
+      image.material = imageMaterial;
+      var m = new BABYLON.Mesh("", this._scene)
+      m.addChild(image)
+      res(m)
+
+    }); 
+    
+    return p; 
+
+  }
+
 
   createCursor() {
     var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
@@ -237,7 +310,7 @@ class Game {
     // create the skybox cubemap
     var skybox = BABYLON.Mesh.CreateBox("skyBox", 10000, this._scene);
     var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this._scene);
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("Textures/sky7/sky7", this._scene);
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("Textures/grad1/grad1", this._scene);
     skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
     skyboxMaterial.backFaceCulling = false;
     skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
@@ -256,17 +329,23 @@ class Game {
 
     this._gazeTarget = new SelectedObject();
 
+    // TODO: replace the below with localStorage. 
     var objects:Array<CollectedObject> = []
     var objectCount = 5
     for (var i = 0; i < objectCount; i++) {
       objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
     }
+    for (var i = 5; i < 10; i++) {
+      objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
+    }
+
     var index = 0
     objects.forEach((o)=>{
       this._objectMap[o.uniqueID] = o
-      this.loadModel("/", o.src).then((m)=>{
+      this.load("/", o.src).then((m)=>{
         console.log("loaded")
         o.mesh = m
+        
         m.name = o.uniqueID
         console.log(m.name)
 
@@ -298,6 +377,7 @@ class Game {
         m.scaling.x = desiredSize / size
         m.scaling.y = desiredSize / size
         m.scaling.z = desiredSize / size
+        m.lookAt(new BABYLON.Vector3(0,1,0))
         index++
       })
     })
