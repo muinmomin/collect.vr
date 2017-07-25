@@ -33,6 +33,7 @@ class Game {
   private _cursor: BABYLON.Mesh;
   private _gazeTarget: SelectedObject;
   private objectJump=.8;
+  private _objectMap:Map<string, CollectedObject> = new Map<string, CollectedObject>()
 
   constructor(canvasElement: string) {
     // Create canvas and engine
@@ -42,7 +43,7 @@ class Game {
     // TODO: A total hack here since we aren't bundling the controller models in our custom babylon build
     BABYLON['windowsControllerSrc'] = '/vrTemplate/assets/controllers/wmr/';
   }
-
+  
   async loadModel(root, name): Promise<BABYLON.Mesh> {
     var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
       var parent = new BABYLON.Scene(this._engine)
@@ -146,6 +147,7 @@ class Game {
 
     var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
     console.log(mesh.name)
+    console.log(this._objectMap[mesh.name])
     if (this._cursor) {
       // zoom in
       this._gazeTarget.positionInCollection = mesh.position.clone();
@@ -258,6 +260,7 @@ class Game {
     }
     var index = 0
     objects.forEach((o)=>{
+      this._objectMap[o.uniqueID] = o
       this.loadModel("/", o.src).then((m)=>{
         console.log("loaded")
         o.mesh = m
