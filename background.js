@@ -66,7 +66,7 @@
             var collections = localStorage.getItem(COLLECTION_KEY) ? localStorage.getItem(COLLECTION_KEY) : '[]';
             var oldCollections = JSON.parse(collections);
             oldCollections.push(obj);
-            localStorage.setItem(COLLECTION_KEY, JSON.stringify(oldCollections));
+            localStorage.setItem(COLLECTION_KEY, JnSON.stringify(oldCollections));
       });
 
 })();
