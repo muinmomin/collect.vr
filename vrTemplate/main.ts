@@ -78,7 +78,7 @@ class Game {
     this._engine = new BABYLON.Engine(this._canvas, true);
 
     this._show3dButton.addEventListener('click', () => {
-      console.log('3d button clicked');
+      this.show3d();
     });
     
     // TODO: A total hack here since we aren't bundling the controller models in our custom babylon build
@@ -275,11 +275,14 @@ class Game {
     }
 
     this._scene.onPointerDown = () => {
-      console.log("down")
-      this._scene.onPointerDown = undefined;
-      this.createCursor();      
-      this._scene.registerBeforeRender(() => { this.updateCursor(); });
+      // console.log("down")
+      // this._scene.onPointerDown = undefined;
+      // this.createCursor();      
+      // this._scene.registerBeforeRender(() => { this.updateCursor(); });
     };
+
+    this.createCursor();      
+    this._scene.registerBeforeRender(() => { this.updateCursor(); });
 
     window.addEventListener('keydown', (eventArg) => {
       if (eventArg.key == '`')
