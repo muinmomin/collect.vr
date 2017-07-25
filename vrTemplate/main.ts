@@ -57,7 +57,7 @@ class Game {
       //this._camera.deviceScaleFactor = 1;
     } else {
       // create a FreeCamera, and set its position to (x:0, y:5, z:-10)
-      this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 5, -10), this._scene);
+      this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 1.5, -10), this._scene);
 
       //  this._camera = new BABYLON.ArcRotateCamera("camera", 4.712, 1.571, 0.05, BABYLON.Vector3.Zero(), this._scene);
       //   this._camera.attachControl(this._canvas, true);
@@ -109,6 +109,14 @@ class Game {
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     skybox.material = skyboxMaterial;
 
+    // create the ground (round platform)
+    var groundMaterial = new BABYLON.StandardMaterial("ground", this._scene);
+    groundMaterial.diffuseTexture = new BABYLON.Texture("textures/polar_grid.png", this._scene);
+    var ground = BABYLON.Mesh.CreateCylinder("ground", 0.1, 3, 3, 100, 10, this._scene);
+    // the user should see the ground below
+    ground.position = new BABYLON.Vector3(0, 0, -10);
+    ground.material = groundMaterial;
+
     // // create a built-in "sphere" shape; with 16 segments and diameter of 2
     // let sphere = BABYLON.MeshBuilder.CreateSphere('sphere1',
     //   { segments: 16, diameter: 2 }, this._scene);
@@ -118,15 +126,38 @@ class Game {
     //   BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING
     
     //BABYLON.SceneLoader.ImportMesh()
-    for(var i = 0;i<5;i++){
-      var meshName = "Duck"
-      var parent = await this.loadModel("assets/Duck/", meshName+".gltf")
-      parent.position.x = 2*i
-    }
+    var objectCount = 5
+    for(var i = 0;i<objectCount;i++){
+      var meshName = Math.random() > 0.5 ? "Duck" : "Avocado"
+      var parent = await this.loadModel("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/"+meshName+"/glTF/", meshName+".gltf")
+      
+      var size = 0
+      var bottom = Infinity
 
-    // create a built-in "ground" shape
-    let ground = BABYLON.MeshBuilder.CreateGround('ground1',
-      { width: 6, height: 6, subdivisions: 2 }, this._scene);
+      //Try to get object x size and bottom y pos
+      parent.getChildMeshes().forEach((c)=>{
+        var diff = c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x
+        var bottomY = c.getBoundingInfo().boundingBox.minimum.y+c.position.y
+        if(isFinite(diff) && diff !=0){
+          size = Math.max(size, c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x)
+          bottom = Math.min(bottom, bottomY)
+        }
+      })
+      //TODO bottom is incorrect?
+      console.log(bottom)
+      
+      //Put objects randomly in arc in from of camera
+      parent.position.y = 1+Math.random()*1
+      var rot = -Math.PI/2+(Math.PI*Math.random())
+      parent.position.x = this._camera.position.x + (Math.sin(rot)*5)//2*(i-objectCount/2)
+      parent.position.z = this._camera.position.z + (Math.cos(rot)*5)
+
+      //Scale to be same size
+      var desiredSize = 1
+      parent.scaling.x = desiredSize/size
+      parent.scaling.y = desiredSize/size
+      parent.scaling.z = desiredSize/size
+    }
   }
     
   async loadMesh(rootUrl: string, sceneFilename: any): Promise<BABYLON.Mesh> {
