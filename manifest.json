@@ -9,9 +9,9 @@
     },
     "browser_action": {
         "default_icon": {
-            "16": "assets/Logo16.png",
-            "20": "assets/Logo20.png",
-            "40": "assets/Logo40.png"
+            "16": "docs/assets/Logo16.png",
+            "20": "docs/assets/Logo20.png",
+            "40": "docs/assets/Logo40.png"
         },
         "default_title": "collect.vr",
         "default_popup": "popup.html"
