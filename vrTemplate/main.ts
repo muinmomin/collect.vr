@@ -241,7 +241,7 @@ class Game {
     }
     BABYLON.Tools.CreateScreenshot(this._engine, this._camera, 512, (base64img) => {
       localStorage.setItem('screenshot', base64img);
-    });
+    }, 'png');
   }
 
   async createScene() {
