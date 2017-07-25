@@ -108,6 +108,12 @@ class Game {
       // gaze sees a new object
       if (!this._gazeTarget.mesh || this._gazeTarget.mesh != hit.pickedMesh) {
         this._gazeTarget.mesh = hit.pickedMesh;
+        var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
+        while(mesh.parent != null){
+          var other:any = mesh.parent
+          mesh = other
+        }
+        this._gazeTarget.mesh = mesh
         this.addObjectHighlight(this._gazeTarget);
       }
     }
@@ -139,10 +145,6 @@ class Game {
     }
 
     var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
-    while(mesh.parent != null){
-      var other:any = mesh.parent
-      mesh = other
-    }
     console.log(mesh.name)
     if (this._cursor) {
       // zoom in
@@ -206,10 +208,6 @@ class Game {
       }
       if((eventArg.keyCode == 85 || eventArg.keyCode==68) && this._gazeTarget){
         var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
-        while(mesh.parent != null){
-          var other:any = mesh.parent
-          mesh = other
-        }
         let v=new BABYLON.Vector3(0,0,this.objectJump);
 
         if((eventArg.keyCode==85)){
