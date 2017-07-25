@@ -6,6 +6,7 @@ class Game {
   private _camera: BABYLON.FreeCamera;
   private _light: BABYLON.Light;
   private _cursor: BABYLON.Mesh;
+  private _meshUnderGaze: BABYLON.AbstractMesh;
 
   constructor(canvasElement: string) {
     // Create canvas and engine
@@ -14,6 +15,8 @@ class Game {
 
     // TODO: A total hack here since we aren't bundling the controller models in our custom babylon build
     BABYLON['windowsControllerSrc'] = '/vrTemplate/assets/controllers/wmr/';
+
+    this._meshUnderGaze = undefined;
   }
 
   async loadModel(root, name): Promise<BABYLON.Mesh> {
@@ -39,49 +42,58 @@ class Game {
     return p;
   }
 
-  vecToLocal(vector, mesh): BABYLON.Vector3 {
-    var m = mesh.getWorldMatrix();
-    var v = BABYLON.Vector3.TransformCoordinates(vector, m);
-    return v;
-  }
-
-  meshPicker(mesh): boolean {
-    if (mesh.name === "skyBox") {
-      return false;
-    }
-
-    if (mesh.name === "ground") {
-      return false;
-    }
-
-    if (mesh.name === "cursor") {
-      return false;
-    }
-
-    return true;
-  }
-
-  drawCursor() {
+  updateCursor() {
     var forward = new BABYLON.Vector3(0, 0, -1);
-    forward = this.vecToLocal(forward, this._camera);
+    forward = vecToLocal(forward, this._camera);
     var origin = this._camera.globalPosition;
 
     var direction = forward.subtract(origin);
     direction = BABYLON.Vector3.Normalize(direction);
 
-    var length = 100;
+    var length = 30;
 
     var ray = new BABYLON.Ray(origin, direction, length);
    
-    var hit = this._scene.pickWithRay(ray, this.meshPicker);
+    var hit = this._scene.pickWithRay(ray, null);
 
     if (!hit || !hit.pickedMesh) {
-      //draw cursor no selection
+      // draw cursor no selection
       this._cursor.position = this._camera.getFrontPosition(length);
+
+      // gaze removed from an object
+      if (this._meshUnderGaze) {
+        this.removeObjectHighlight(this._meshUnderGaze);
+        this._meshUnderGaze = undefined;
+      }
     } else {
       // selection cursor
       this._cursor.position = hit.pickedPoint;
+
+      // gaze sees a new object
+      if (!this._meshUnderGaze || this._meshUnderGaze != hit.pickedMesh) {
+        this._meshUnderGaze = hit.pickedMesh;
+        this.addObjectHighlight(this._meshUnderGaze);
+      }
     }
+  }
+
+  removeObjectHighlight(mesh) {
+    if (!mesh || !mesh.name) {
+      console.error("Can't hightlight mesh: " + mesh);
+      return;
+    }
+
+    console.debug("hideMenuOptions for: " + mesh.name);
+  }
+
+  addObjectHighlight(mesh) {
+    if (!mesh || !mesh.name) {
+      console.error("Can't hightlight mesh: " + mesh);
+      return;
+    }
+
+    // getObjectDetails(mesh.name);
+    console.debug("showMenuOptions for: " + mesh.name);
   }
 
   async createScene() {
@@ -122,8 +134,9 @@ class Game {
       var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
       cursorMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
       this._cursor.material = cursorMaterial;
+      this._cursor.isPickable = false;
       
-      this._scene.registerBeforeRender(() => { this.drawCursor(); });
+      this._scene.registerBeforeRender(() => { this.updateCursor(); });
     };
 
     window.addEventListener('keydown', (eventArg) => {
@@ -154,6 +167,7 @@ class Game {
     skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     skybox.material = skyboxMaterial;
+    skybox.isPickable = false;
 
     // create the ground (round platform)
     var groundMaterial = new BABYLON.StandardMaterial("ground", this._scene);
@@ -162,6 +176,7 @@ class Game {
     // the user should see the ground below
     ground.position = new BABYLON.Vector3(0, -1.5, -10);
     ground.material = groundMaterial;
+    ground.isPickable = false;
 
     // // create a built-in "sphere" shape; with 16 segments and diameter of 2
     // let sphere = BABYLON.MeshBuilder.CreateSphere('sphere1',
@@ -236,3 +251,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   // start animation
   game.animate();
 });
+
+/* Utilities */
+var vecToLocal = function (vector, mesh): BABYLON.Vector3 {
+  var m = mesh.getWorldMatrix();
+  var v = BABYLON.Vector3.TransformCoordinates(vector, m);
+  return v;
+}
