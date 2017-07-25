@@ -10,6 +10,9 @@ class Game {
     // Create canvas and engine
     this._canvas = document.getElementById(canvasElement);
     this._engine = new BABYLON.Engine(this._canvas, true);
+
+    // TODO: A total hack here since we aren't bundling the controller models in our custom babylon build
+    BABYLON['windowsControllerSrc'] = '/vrTemplate/assets/controllers/wmr/';
   }
 
   async loadModel(root, name): Promise<BABYLON.Mesh> {
@@ -71,15 +74,13 @@ class Game {
       var displays = await navigator.getVRDisplays()
       if (displays[0]) {
         headset = displays[0];
-        console.log(headset)
       }
-      console.log("hit3")
     }
 
     if (headset) {
       // Create a WebVR camera with the trackPosition property set to false so that we can control movement with the gamepad
-      this._camera = this._webVrCamera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, -10), this._scene, { trackPosition: false });
-      
+      this._camera = this._webVrCamera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, 0), this._scene, { trackPosition: true });
+
       //this._camera.deviceScaleFactor = 1;
     } else {
       // create a FreeCamera, and set its position to (x:0, y:0, z:-10)
@@ -96,19 +97,6 @@ class Game {
       console.log("down")
       this._scene.onPointerDown = undefined
       this._camera.attachControl(this._canvas, true);
-      this.loadModel('/vrTemplate/', 'assets/controllers/wmr/CK_Left.glb')
-      if (this._webVrCamera) {
-        this._webVrCamera.controllers.forEach((gp) => {
-          console.log('Found a gamepad: ' + gp.id);
-          // Hacky mc hackface
-          let vendorName = (gp.id || '').indexOf('Spatial Controller') != 0 ? 'wmr' : 'generic';
-          let meshName = gp.hand === 'left' ? 'CK_Left.glb' : 'CK_Right.glb';
-
-          this.loadModel('/vrTemplate/', 'assets/controllers/'+vendorName+'/'+meshName).then((mesh: BABYLON.Mesh) => {
-            gp.attachToMesh(mesh);
-          });
-        });
-      }
     };
 
     window.addEventListener('keydown', (eventArg) => {
