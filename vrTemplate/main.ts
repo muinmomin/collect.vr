@@ -20,15 +20,15 @@ class Game {
         meshses.forEach((m,i)=>{
           //console.log(m.parent == this._scene)
           //var other:any = this._scene
-          if(i==0){
+          if(!m.parent){
             console.log("hit")
-            parent.addChild(m)
+            m.setParent(parent);
             //m.parent = parent
           }
         })
         res(parent);
-      }, null, function (scene) {
-        rej("failed to load model")
+      }, null, function (scene, message) {
+        rej(message)
       })
       var m = new BABYLON.Mesh(null, null);
     });
@@ -96,7 +96,7 @@ class Game {
       console.log("down")
       this._scene.onPointerDown = undefined
       this._camera.attachControl(this._canvas, true);
-      
+      this.loadModel('./', 'assets/controllers/wmr/CK_Left.glb')
       if (this._webVrCamera) {
         this._webVrCamera.controllers.forEach((gp) => {
           console.log('Found a gamepad: ' + gp.id);
@@ -104,7 +104,7 @@ class Game {
           let vendorName = (gp.id || '').indexOf('Spatial Controller') != 0 ? 'wmr' : 'generic';
           let meshName = gp.hand === 'left' ? 'CK_Left.glb' : 'CK_Right.glb';
 
-          this.loadMesh('./', 'assets/controllers/'+vendorName+'/'+meshName).then((mesh: BABYLON.Mesh) => {
+          this.loadModel('./', 'assets/controllers/'+vendorName+'/'+meshName).then((mesh: BABYLON.Mesh) => {
             gp.attachToMesh(mesh);
           });
         });
@@ -161,7 +161,7 @@ class Game {
     var objectCount = 5
     for (var i = 0; i < objectCount; i++) {
       var meshName = Math.random() > 0.5 ? "Duck" : "Avocado"
-      var parent = await this.loadModel("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/" + meshName + "/glTF/", meshName + ".gltf")
+      var parent = await this.loadModel("assets/" + meshName + "/", meshName + ".glb")
 
       var size = 0
       var bottom = Infinity
@@ -197,16 +197,6 @@ class Game {
       parent.scaling.y = desiredSize / size
       parent.scaling.z = desiredSize / size
     }
-  }
-    
-  async loadMesh(rootUrl: string, sceneFilename: any): Promise<BABYLON.Mesh> {
-
-    // TODO: Travis imlement this :)
-    let box = BABYLON.Mesh.CreateBox("sphere1", 0.1, this._scene);
-    box.scaling.copyFromFloats(2, 1, 2);
-    box.material = new BABYLON.StandardMaterial('right', this._scene);
-
-    return Promise.resolve(box);
   }
   
   animate(): void {
