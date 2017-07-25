@@ -274,13 +274,6 @@ class Game {
       this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, 0), this._scene);
     }
 
-    this._scene.onPointerDown = () => {
-      // console.log("down")
-      // this._scene.onPointerDown = undefined;
-      // this.createCursor();      
-      // this._scene.registerBeforeRender(() => { this.updateCursor(); });
-    };
-
     this.createCursor();      
     this._scene.registerBeforeRender(() => { this.updateCursor(); });
 
