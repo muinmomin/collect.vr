@@ -62,6 +62,7 @@ class Space {
 
 class Game {
   private _canvas: any;//HTMLCanvasElement;
+  private _show3dButton: any;
   private _engine: BABYLON.Engine;
   private _scene: BABYLON.Scene;
   private _webVrCamera: BABYLON.WebVRFreeCamera;
@@ -73,11 +74,16 @@ class Game {
   private _space:Space;
   //private _objectMap:Map<string, CollectedObject> = new Map<string, CollectedObject>()
 
-  constructor(canvasElement: string) {
+  constructor(canvasElement: string, show3dButtonElement: string) {
     // Create canvas and engine
     this._canvas = document.getElementById(canvasElement);
+    this._show3dButton = document.getElementById(show3dButtonElement);
     this._engine = new BABYLON.Engine(this._canvas, true);
 
+    this._show3dButton.addEventListener('click', () => {
+      this.show3d();
+    });
+    
     // TODO: A total hack here since we aren't bundling the controller models in our custom babylon build
     BABYLON['windowsControllerSrc'] = '/vrTemplate/assets/controllers/wmr/';
   }
@@ -144,7 +150,10 @@ class Game {
 
   }
 
-
+  show3d() {
+    this._camera.attachControl(this._canvas, true);
+  }
+  
   createCursor() {
     var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
     cursorMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
@@ -277,14 +286,8 @@ class Game {
       this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, 0), this._scene);
     }
 
-    this._scene.onPointerDown = () => {
-      console.log("down")
-      this._scene.onPointerDown = undefined
-      this._camera.attachControl(this._canvas, true);
-
-      this.createCursor();      
-      this._scene.registerBeforeRender(() => { this.updateCursor(); });
-    };
+    this.createCursor();      
+    this._scene.registerBeforeRender(() => { this.updateCursor(); });
 
     window.addEventListener('keydown', (eventArg) => {
       if (eventArg.key == '`')
@@ -414,7 +417,7 @@ class Game {
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Create the game using the 'renderCanvas'
-  let game = new Game('renderCanvas');
+  let game = new Game('renderCanvas', 'show3dButton');
 
   // Create the scene
   await game.createScene();

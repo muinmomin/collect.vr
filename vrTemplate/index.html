@@ -20,9 +20,35 @@
             height  : 100%;
             touch-action: none;
         }
+
+        #show3dButton {
+            display: inline-block;
+            bottom: 0;
+            right: 0;
+            position: fixed;
+            margin: 5px;
+            padding: 5px;
+            height:40px;
+            width: 60px;
+            border-radius: 10px;
+            opacity:0.5;
+            background-color: grey;
+        }
+
+        #show3dButton:hover {
+            cursor:pointer;
+            opacity:1;
+        }
+
+        #show3dButton img {
+            width:100%;
+        }
     </style>
 </head>
 <body>
     <canvas id="renderCanvas"></canvas>
+    <div id="show3dButton">
+        <img src="assets/imgs/WebVRIcon.png"/>
+    </div>
 </body>
 </html>
