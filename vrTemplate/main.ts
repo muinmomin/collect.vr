@@ -232,46 +232,50 @@ class Game {
 
     this._gazeTarget = new SelectedObject();
 
-    //BABYLON.SceneLoader.ImportMesh()
+    var objects:Array<CollectedObject> = []
     var objectCount = 5
     for (var i = 0; i < objectCount; i++) {
-      var meshName = Math.random() > 0.5 ? "Avocado" : "Avocado"
-      var parent = await this.loadModel("/docs/assets/", meshName + ".glb")
-
-      var size = 0
-      var bottom = Infinity
-
-      //Try to get object x size and bottom y pos
-      parent.getChildMeshes().forEach((c) => {
-
-        var diff = c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x
-        var bottomY = c.getBoundingInfo().boundingBox.minimum.y + c.position.y
-        if (isFinite(diff) && diff != 0) {
-          size = Math.max(size, c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x)
-          bottom = Math.min(bottom, bottomY)
-        }
-      })
-      //TODO bottom is incorrect?
-
-      //console.log(bottom)
-      
-      //Put objects randomly in arc in from of camera
-      //+Math.random()*1
-      var rowSize = 3
-      var rowIndex = i%rowSize
-      console.log(rowIndex)
-      var colIndex = Math.floor(i/rowSize)
-      var rot = -Math.PI/2+(Math.PI*(rowIndex/(rowSize-1)))
-      parent.position.x = this._camera.position.x + (Math.sin(rot)*5)//2*(i-objectCount/2)
-      parent.position.z = this._camera.position.z + (Math.cos(rot)*5)
-      parent.position.y = 1 + colIndex*2
-
-      //Scale to be same size
-      var desiredSize = 1
-      parent.scaling.x = desiredSize / size
-      parent.scaling.y = desiredSize / size
-      parent.scaling.z = desiredSize / size
+      objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
     }
+    var index = 0
+    objects.forEach((o)=>{
+      this.loadModel("/", o.src).then((m)=>{
+        console.log("loaded")
+        o.mesh = m
+        m.name = o.uniqueID
+
+        var size = 0
+        var bottom = Infinity
+
+        //Try to get object x size and bottom y pos
+        m.getChildMeshes().forEach((c) => {
+          var diff = c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x
+          var bottomY = c.getBoundingInfo().boundingBox.minimum.y + c.position.y
+          if (isFinite(diff) && diff != 0) {
+            size = Math.max(size, c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x)
+            bottom = Math.min(bottom, bottomY)
+          }
+        })
+        //TODO bottom is incorrect?
+        var startPos= new BABYLON.Vector3(0, 0, -10)
+
+        var rowSize = 3
+        var rowIndex = index%rowSize
+        var colIndex = Math.floor(index/rowSize)
+        var rot = -Math.PI/2+(Math.PI*(rowIndex/(rowSize-1)))
+        m.position.x = startPos.x + (Math.sin(rot)*5)//2*(i-objectCount/2)
+        m.position.z = startPos.z + (Math.cos(rot)*5)
+        m.position.y = 1 + colIndex*2
+
+        //Scale to be same size
+        var desiredSize = 1
+        m.scaling.x = desiredSize / size
+        m.scaling.y = desiredSize / size
+        m.scaling.z = desiredSize / size
+        index++
+      })
+    })
+    
   }
   
   animate(): void {
