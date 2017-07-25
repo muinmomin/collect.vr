@@ -2,12 +2,13 @@ class Space {
   public _id: number;
   public _src: number;
   public _title: string;
-  public _collections: Array<number>;
+  public _collectionsId: Array<number>;
   private _database: 'collections';
 
   // TODO: constructor with localstorage
   constructor() {
-    var collections = localStorage.getItem(COLLECTION_KEY) ? localStorage.getItem(COLLECTION_KEY) : [];
+    var collectionsJSON = localStorage.getItem(this._database);
+    
   }
 
   // TODO: override default getter and setter.

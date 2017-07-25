@@ -2,6 +2,7 @@ vrTemplate/*.js
 vrTemplate/*.js.map
 !vrTemplate/babylon.js
 !vrTemplate/babylon.glTFFileLoader.js
+!vrTemplate/babylon.max.js
 **/node_modules
 ./.collect.vr/public
 .vscode

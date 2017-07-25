@@ -4,11 +4,15 @@
     "description": "collect.vr",
     "author": "Author",
     "icons": {
-       
+        "16": "docs/assets/Logo16.png",
+        "20": "docs/assets/Logo20.png",
+        "40": "docs/assets/Logo40.png"
     },
     "browser_action": {
         "default_icon": {
-           
+            "16": "docs/assets/Logo16.png",
+            "20": "docs/assets/Logo20.png",
+            "40": "docs/assets/Logo40.png"
         },
         "default_title": "collect.vr",
         "default_popup": "popup.html"
@@ -21,7 +25,7 @@
         "<all_urls>"
     ],
     "background": {
-    "page": "background.html",
-    "persistent": false
-  }
+        "page": "background.html",
+        "persistent": false
+    }
 }
