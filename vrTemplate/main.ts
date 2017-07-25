@@ -1,5 +1,26 @@
 class CollectedObject {
-  
+  guid() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+      s4() + '-' + s4() + s4() + s4();
+  }
+  id:number
+  ref: string
+  title: string
+  uniqueID: string
+  pos: {
+    x:number
+    y:number
+    z:number
+  }
+  mesh:BABYLON.Mesh
+  constructor(public type:string, public src:string){
+    this.uniqueID = this.guid()
+  }
 }
 
 class Game {
