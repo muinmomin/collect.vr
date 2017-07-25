@@ -14,10 +14,6 @@
             title: 'Collect',
             contexts: ['all']
       });
-
-      browser.browserAction.onClicked.addListener((tab) => {
-            alert('hi');
-      })
       
       // Captures data from right click and saves to local storage.
       browser.contextMenus.onClicked.addListener((info, tab) => {
