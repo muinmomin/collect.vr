@@ -62,6 +62,8 @@ class Game {
   private _light: BABYLON.Light;
   private _cursor: BABYLON.Mesh;
   private _gazeTarget: SelectedObject;
+  private objectJump=.8;
+  private _objectMap:Map<string, CollectedObject> = new Map<string, CollectedObject>()
 
   constructor(canvasElement: string) {
     // Create canvas and engine
@@ -161,6 +163,12 @@ class Game {
       // gaze sees a new object
       if (!this._gazeTarget.mesh || this._gazeTarget.mesh != hit.pickedMesh) {
         this._gazeTarget.mesh = hit.pickedMesh;
+        var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
+        while(mesh.parent != null){
+          var other:any = mesh.parent
+          mesh = other
+        }
+        this._gazeTarget.mesh = mesh
         this.addObjectHighlight(this._gazeTarget);
       }
     }
@@ -192,14 +200,11 @@ class Game {
     }
 
     var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
-    while(mesh.parent != null){
-      var other:any = mesh.parent
-      mesh = other
-    }
     console.log(mesh.name)
+    console.log(this._objectMap[mesh.name])
     if (this._cursor) {
       // zoom in
-      this._gazeTarget.positionInCollection = mesh.position;
+      this._gazeTarget.positionInCollection = mesh.position.clone();
       mesh.setAbsolutePosition(this._camera.getFrontPosition(this._gazeTarget.GetZoomDistanceToCam()));
       //mesh.scaling = new BABYLON.Vector3(5, 5, 5); - changes the object position weirdly
 
@@ -238,7 +243,7 @@ class Game {
       //this._camera.deviceScaleFactor = 1;
     } else {
       // create a FreeCamera, and set its position to (x:0, y:0, z:-10)
-      this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, -10), this._scene);
+      this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, 0), this._scene);
     }
 
     this._scene.onPointerDown = () => {
@@ -257,6 +262,18 @@ class Game {
       if (eventArg.key == ' ') {
         this.toggleZoomObjectMode();
       }
+      if((eventArg.keyCode == 85 || eventArg.keyCode==68) && this._gazeTarget){
+        var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
+        let v=new BABYLON.Vector3(0,0,this.objectJump);
+
+        if((eventArg.keyCode==85)){
+          v.z*=-1;
+        }
+        console.log(v);
+        console.log(mesh.position);
+        mesh.position.z+=v.z;
+        console.log(mesh.position);
+        }
     });
 
     // target the camera to scene origin
@@ -284,7 +301,7 @@ class Game {
     groundMaterial.diffuseTexture = new BABYLON.Texture("textures/polar_grid.png", this._scene);
     var ground = BABYLON.Mesh.CreateCylinder("ground", 0.1, 3, 3, 100, 10, this._scene);
     // the user should see the ground below
-    ground.position = new BABYLON.Vector3(0, -1.5, -10);
+    ground.position = new BABYLON.Vector3(0, -1.5, 0);
     ground.material = groundMaterial;
     ground.isPickable = false;
 
@@ -297,6 +314,7 @@ class Game {
     }
     var index = 0
     objects.forEach((o)=>{
+      this._objectMap[o.uniqueID] = o
       this.loadModel("/", o.src).then((m)=>{
         console.log("loaded")
         o.mesh = m
@@ -316,7 +334,7 @@ class Game {
           }
         })
         //TODO bottom is incorrect?
-        var startPos= new BABYLON.Vector3(0, 0, -10)
+        var startPos= new BABYLON.Vector3(0, 0, 0)
 
         var rowSize = 3
         var rowIndex = index%rowSize
