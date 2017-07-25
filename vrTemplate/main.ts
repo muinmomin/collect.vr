@@ -234,7 +234,7 @@ class Game {
     // create the skybox cubemap
     var skybox = BABYLON.Mesh.CreateBox("skyBox", 10000, this._scene);
     var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this._scene);
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("Textures/sky7/sky7", this._scene);
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("Textures/grad1/grad1", this._scene);
     skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
     skyboxMaterial.backFaceCulling = false;
     skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
