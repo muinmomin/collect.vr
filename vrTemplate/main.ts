@@ -129,8 +129,9 @@ class Game {
       imageMaterial.diffuseTexture = new BABYLON.Texture(srcPath, this._scene);
       // image.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
       image.material = imageMaterial;
-
-      return image; 
+      var m = new BABYLON.Mesh("", this._scene)
+      m.addChild(image)
+      res(m)
 
     }); 
     
@@ -331,9 +332,9 @@ class Game {
     for (var i = 0; i < objectCount; i++) {
       objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
     }
-    // for (var i = 5; i < 10; i++) {
-    //   objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
-    // }
+    for (var i = 5; i < 10; i++) {
+      objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
+    }
 
     var index = 0
     objects.forEach((o)=>{
