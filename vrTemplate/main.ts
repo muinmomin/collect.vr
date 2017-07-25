@@ -129,8 +129,9 @@ class Game {
       imageMaterial.diffuseTexture = new BABYLON.Texture(srcPath, this._scene);
       // image.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
       image.material = imageMaterial;
-
-      return image; 
+      var m = new BABYLON.Mesh("", this._scene)
+      m.addChild(image)
+      res(m)
 
     }); 
     
@@ -238,6 +239,9 @@ class Game {
       // turn on the cursor back
       this.createCursor();
     }
+    BABYLON.Tools.CreateScreenshot(this._engine, this._camera, 512, (base64img) => {
+      localStorage.setItem('screenshot', base64img);
+    });
   }
 
   async createScene() {
@@ -331,9 +335,9 @@ class Game {
     for (var i = 0; i < objectCount; i++) {
       objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
     }
-    // for (var i = 5; i < 10; i++) {
-    //   objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
-    // }
+    for (var i = 5; i < 10; i++) {
+      objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
+    }
 
     var index = 0
     objects.forEach((o)=>{
@@ -341,6 +345,7 @@ class Game {
       this.load("/", o.src).then((m)=>{
         console.log("loaded")
         o.mesh = m
+        
         m.name = o.uniqueID
         console.log(m.name)
 
@@ -372,6 +377,7 @@ class Game {
         m.scaling.x = desiredSize / size
         m.scaling.y = desiredSize / size
         m.scaling.z = desiredSize / size
+        m.lookAt(new BABYLON.Vector3(0,1,0))
         index++
       })
     })
