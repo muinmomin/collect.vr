@@ -14,8 +14,11 @@ class CollectedObject {
   constructor(public fileType:string, public src:string){
     this.uniqueID = this.guid()
 
-    localStorage.getItem(this.COLLECTION_KEY);
+    var rawCollections = localStorage.getItem(this.COLLECTION_KEY) ? localStorage.getItem(this.COLLECTION_KEY) : [];
+    
   }
+
+  // Override local getter and setter 
 
   // Generate unique ID. 
   guid() {
@@ -30,28 +33,27 @@ class CollectedObject {
   }
 }
 
-class Item {
-  public _id: number;
-  public _x: number;
-  public _y: number;
-  public _z: number;
-  public _scale: number;
-  public _rotation: number; 
-
-  //TODO: constructor with localStorage 
-
-  //TODO: override default getter and setter.
-}
 class Space {
-  public _id: number;
-  public _src: number;
-  public _title: string;
-  public _collectionsId: Array<number>;
-  private _database: 'collections';
+  // public _id: number;
+  //public _src: string;
+  //public _title: string;
+  //public _collections: Array<CollectedObject>;
+  public _objectMap:Map<string, CollectedObject> = new Map<string, CollectedObject>()
+
+  private COLLECTION_KEY = 'collections';
+  private _length: number; 
 
   // TODO: constructor with localstorage
   constructor() {
-    var collectionsJSON = localStorage.getItem(this._database);
+    var collectionsStr = localStorage.getItem(this.COLLECTION_KEY);
+    var collectionsJSON = JSON.parse(collectionsStr);
+
+    this._length = collectionsJSON.length;
+    
+    for (var i = 0; i < collectionsJSON.length; ++i) {
+      var collectedObject = new CollectedObject(collectionsJSON[i].type, collectionsJSON[i].src);
+      this._objectMap[collectedObject.uniqueID] = collectedObject;
+    }
     
   }
 
@@ -69,7 +71,8 @@ class Game {
   private _cursor: BABYLON.Mesh;
   private _gazeTarget: SelectedObject;
   private objectJump=.8;
-  private _objectMap:Map<string, CollectedObject> = new Map<string, CollectedObject>()
+  private _space:Space;
+  //private _objectMap:Map<string, CollectedObject> = new Map<string, CollectedObject>()
 
   constructor(canvasElement: string, show3dButtonElement: string) {
     // Create canvas and engine
@@ -89,6 +92,8 @@ class Game {
   // load accepts png file and glb file.
   async load(root, name):Promise<BABYLON.Mesh> {
       var fileExtension = name.split('.').pop();
+
+      console.log('url: ' + name);
       
       if (fileExtension == 'png') {
         return this.loadImage(root, name)
@@ -128,7 +133,7 @@ class Game {
     var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
       var filename = name.slice(0, -4);
       var planeName = filename + 'Plane';
-      var srcPath = '/' + name; 
+      var srcPath = '' + name; 
       const size = 1.0;  /* Scaling factor for the image is called size. */  
       var imageMaterial = new BABYLON.StandardMaterial(filename, this._scene);
       var image = BABYLON.Mesh.CreatePlane(planeName, size, this._scene, false, BABYLON.Mesh.DEFAULTSIDE);
@@ -230,7 +235,7 @@ class Game {
 
     var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
     console.log(mesh.name)
-    console.log(this._objectMap[mesh.name])
+    console.log(this._space._objectMap[mesh.name])
     if (this._cursor) {
       // zoom in
       this._gazeTarget.positionInCollection = mesh.position.clone();
@@ -258,6 +263,10 @@ class Game {
     // create a basic BJS Scene object
     this._scene = new BABYLON.Scene(this._engine);
     this._scene.useRightHandedSystem = true;
+    this._space = new Space();
+    console.log('space is');
+    console.log(this._space);
+
 
     var headset = null;
     // If a VR headset is connected, get its info
@@ -334,19 +343,25 @@ class Game {
     this._gazeTarget = new SelectedObject();
 
     // TODO: replace the below with localStorage. 
-    var objects:Array<CollectedObject> = []
-    var objectCount = 5
-    for (var i = 0; i < objectCount; i++) {
-      objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
-    }
-    for (var i = 5; i < 10; i++) {
-      objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
-    }
+    //var objects:Array<CollectedObject> = []
+    // var objectCount = 5
+    // for (var i = 0; i < objectCount; i++) {
+    //   objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
+    // }
+    // for (var i = 5; i < 10; i++) {
+    //   objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
+    // }
 
-    var index = 0
-    objects.forEach((o)=>{
-      this._objectMap[o.uniqueID] = o
+    //var index = 
+    console.log(this._space._objectMap)
+    for(var key in this._space._objectMap){
+      var o = this._space._objectMap[key]
+
+      console.log(o);
+      var index=0
+      //this._space._objectMap[o.uniqueID] = o
       this.load("/", o.src).then((m)=>{
+        console.log(o.src);
         console.log("loaded")
         o.mesh = m
         
@@ -384,7 +399,7 @@ class Game {
         m.lookAt(new BABYLON.Vector3(0,1,0))
         index++
       })
-    })
+    }
     
   }
   
