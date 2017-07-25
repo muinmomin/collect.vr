@@ -46,10 +46,14 @@ button
 }
 #content
 {
+    display:none;
     background-color:lightgray;
     padding-left: 10%;
     padding-right:10%;
     text-align: center;
+}
+#screenshot{
+    display:none;
 }
 .content-text
 {
