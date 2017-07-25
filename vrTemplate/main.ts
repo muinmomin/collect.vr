@@ -138,7 +138,7 @@ class Game {
     }
 
     var mesh = this._gazeTarget.mesh;
-
+    console.log(mesh.name)
     if (this._cursor) {
       // zoom in
       this._gazeTarget.positionInCollection = mesh.position;
@@ -243,6 +243,7 @@ class Game {
         console.log("loaded")
         o.mesh = m
         m.name = o.uniqueID
+        console.log(m.name)
 
         var size = 0
         var bottom = Infinity
