@@ -103,6 +103,8 @@ class Game {
       if (eventArg.keyCode == 32) {
         this.pickObjectUnderGaze();
       }
+      if (eventArg.key == '`')
+        this._scene.debugLayer.show();
     });
 
     // target the camera to scene origin
