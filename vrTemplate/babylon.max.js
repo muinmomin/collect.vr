@@ -50365,111 +50365,158 @@ var BABYLON;
         function WindowsMixedRealityController(vrGamepad) {
             var _this = _super.call(this, vrGamepad) || this;
             _this.onSecondaryTriggerStateChangedObservable = new BABYLON.Observable();
-            _this.onThumbRestChangedObservable = new BABYLON.Observable();
+            _this.onTrackpadChangedObservable = new BABYLON.Observable();
             _this.controllerType = PoseEnabledControllerType.WINDOWS;
             return _this;
         }
         WindowsMixedRealityController.prototype.initControllerMesh = function (scene, meshLoaded) {
             var _this = this;
             // TODO: Horrible hack for One...
-            var meshName = this.hand === 'right' ? 'RightTouch.babylon' : 'LeftTouch.babylon';
-            var controllerSrc = "http://yoda.blob.core.windows.net/models/";
-            if (BABYLON['windowsControllerSrc']) {
-                console.log('Loading meshes from: ' + BABYLON['windowsControllerSrc']);
-                meshName = this.hand === 'right' ? 'CK_Right.glb' : 'CK_Left.glb';
-                controllerSrc = BABYLON['windowsControllerSrc'];
+            if (!BABYLON['windowsControllerSrc']) {
+                throw "Please define the global BABYLON['windowsControllerSrc']";
+            }
+            var meshName = this.hand === 'right' ? 'CK_Right.glb' : 'CK_Left.glb';
+            var controllerSrc = BABYLON['windowsControllerSrc'];
+            var parentMeshName = this.id + " " + this.hand;
+            var parentMesh = scene.getMeshByName(parentMeshName);
+            if (parentMesh) {
+                if (!this._defaultModel && parentMesh.getChildren().length) {
+                    this._defaultModel = parentMesh;
+                    if (meshLoaded) {
+                        meshLoaded(this._defaultModel);
+                    }
+                    this.attachToMesh(this._defaultModel);
+                }
             }
             else {
-                console.log('Using boring control!');
+                parentMesh = new BABYLON.Mesh(parentMeshName, scene);
+                BABYLON.SceneLoader.ImportMesh("", controllerSrc, meshName, scene, function (newMeshes) {
+                    /*
+                   RootNode
+                   Controller
+                    HOME
+                    PRESSED
+                    UNPRESSED
+                    VALUE
+                        CrystalKey_6DOF_Home_Geo
+                    MENU
+                    PRESSED
+                    UNPRESSED
+                    VALUE
+                    GRASP
+                    PRESSED
+                    UNPRESSED
+                    VALUE
+                        CrystalKey_6DOF_Grip_Geo
+                    THUMBSTICK_PRESS
+                    PRESSED
+                    UNPRESSED
+                    VALUE
+                        THUMBSTICK_X
+                        MIN
+                        MAX
+                        VALUE
+                        THUMBSTICK_Y
+                        MIN
+                        MAX
+                            VALUE
+                    SELECT
+                    PRESSED
+                    UNPRESSED
+                    VALUE
+                    CrystalKey_6DOF_Constellation
+                    CrystalKey_6DOF_Constellation_Flip
+                        CrystalKey_6DOF_Constellation_Rotate
+                    TOUCHPAD_PRESS
+                    PRESSED
+                    UNPRESSED
+                        VALUE
+                        TOUCHPAD_PRESS_X
+                        MIN
+                        MAX
+                        VALUE
+                        TOUCHPAD_PRESS_Y
+                            MIN
+                            MAX
+                            VALUE
+                            TOUCHPAD_TOUCH_X
+                            MIN
+                            MAX
+                            VALUE
+                            TOUCHPAD_TOUCH_Y
+                                MIN
+                                MAX
+                                VALUE
+                                TOUCH
+                    CrystalKey_6DOF_Body_Geo
+                    CrystalKey_6DOF_Pointing_Pose
+                    CrystalKey_6DOF_LED_Tracking_CSYS
+                    CrystalKey_6DOF_Holding_Pose
+                    */
+                    var childMesh = null;
+                    newMeshes.forEach(function (mesh) {
+                        if (!mesh.parent) {
+                            childMesh = childMesh || mesh;
+                            childMesh.setParent(parentMesh);
+                        }
+                    });
+                    _this._defaultModel = parentMesh;
+                    if (meshLoaded) {
+                        meshLoaded(_this._defaultModel);
+                    }
+                    _this.attachToMesh(_this._defaultModel);
+                });
             }
-            BABYLON.SceneLoader.ImportMesh("", controllerSrc, meshName, scene, function (newMeshes) {
-                /*
-                Parent Mesh name: oculus_touch_left
-                - body
-                - trigger
-                - thumbstick
-                - grip
-                - button_y
-                - button_x
-                - button_enter
-                */
-                var parentMesh = new BABYLON.Mesh("", scene);
-                var childMesh = newMeshes[0];
-                // TODO: This scale hack needs to take palce in the model file, ideally
-                childMesh.scaling.copyFromFloats(0.01, 0.01, 0.01);
-                childMesh.setParent(parentMesh);
-                _this._defaultModel = parentMesh;
-                if (meshLoaded) {
-                    meshLoaded(_this._defaultModel);
-                }
-                _this.attachToMesh(_this._defaultModel);
-            });
         };
-        Object.defineProperty(WindowsMixedRealityController.prototype, "onAButtonStateChangedObservable", {
-            // helper getters for left and right hand.
+        Object.defineProperty(WindowsMixedRealityController.prototype, "onTriggerButtonStateChangedObservable", {
             get: function () {
-                if (this.hand === 'right') {
-                    return this.onMainButtonStateChangedObservable;
-                }
-                else {
-                    throw new Error('No A button on left hand');
-                }
+                return this.onTriggerStateChangedObservable;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(WindowsMixedRealityController.prototype, "onBButtonStateChangedObservable", {
+        Object.defineProperty(WindowsMixedRealityController.prototype, "onMenuButtonStateChangedObservable", {
             get: function () {
-                if (this.hand === 'right') {
-                    return this.onSecondaryButtonStateChangedObservable;
-                }
-                else {
-                    throw new Error('No B button on left hand');
-                }
+                return this.onSecondaryButtonStateChangedObservable;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(WindowsMixedRealityController.prototype, "onXButtonStateChangedObservable", {
+        Object.defineProperty(WindowsMixedRealityController.prototype, "onGripButtonStateChangedObservable", {
             get: function () {
-                if (this.hand === 'left') {
-                    return this.onMainButtonStateChangedObservable;
-                }
-                else {
-                    throw new Error('No X button on right hand');
-                }
+                return this.onMainButtonStateChangedObservable;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(WindowsMixedRealityController.prototype, "onYButtonStateChangedObservable", {
+        Object.defineProperty(WindowsMixedRealityController.prototype, "onThumbstickButtonStateChangedObservable", {
             get: function () {
-                if (this.hand === 'left') {
-                    return this.onSecondaryButtonStateChangedObservable;
-                }
-                else {
-                    throw new Error('No Y button on right hand');
-                }
+                return this.onPadStateChangedObservable;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(WindowsMixedRealityController.prototype, "onTouchpadButtonStateChangedObservable", {
+            get: function () {
+                return this.onTrackpadChangedObservable;
             },
             enumerable: true,
             configurable: true
         });
         /*
-         0) thumb stick (touch, press, value = pressed (0,1)). value is in this.leftStick
-         1) index trigger (touch (?), press (only when value > 0.1), value 0 to 1)
-         2) secondary trigger (same)
-         3) A (right) X (left), touch, pressed = value
-         4) B / Y
-         5) thumb rest
+        // This is the old, broken mapping.
+        0) trigger,
+        1) menu
+        2) grip
+        3) thumb
+        4) touch
         */
         WindowsMixedRealityController.prototype.handleButtonChange = function (buttonIdx, state, changes) {
             var notifyObject = state; //{ state: state, changes: changes };
             var triggerDirection = this.hand === 'right' ? -1 : 1;
+            console.log('Button Change: ' + buttonIdx);
             switch (buttonIdx) {
                 case 0:
-                    this.onPadStateChangedObservable.notifyObservers(notifyObject);
-                    return;
-                case 1:
                     if (this._defaultModel) {
                         (this._defaultModel.getChildren()[3]).rotation.x = -notifyObject.value * 0.20;
                         (this._defaultModel.getChildren()[3]).position.y = -notifyObject.value * 0.005;
@@ -50477,13 +50524,7 @@ var BABYLON;
                     }
                     this.onTriggerStateChangedObservable.notifyObservers(notifyObject);
                     return;
-                case 2:
-                    if (this._defaultModel) {
-                        (this._defaultModel.getChildren()[4]).position.x = triggerDirection * notifyObject.value * 0.0035;
-                    }
-                    this.onSecondaryTriggerStateChangedObservable.notifyObservers(notifyObject);
-                    return;
-                case 3:
+                case 1:
                     if (this._defaultModel) {
                         if (notifyObject.pressed) {
                             (this._defaultModel.getChildren()[1]).position.y = -0.001;
@@ -50494,19 +50535,17 @@ var BABYLON;
                     }
                     this.onMainButtonStateChangedObservable.notifyObservers(notifyObject);
                     return;
-                case 4:
+                case 2:
                     if (this._defaultModel) {
-                        if (notifyObject.pressed) {
-                            (this._defaultModel.getChildren()[2]).position.y = -0.001;
-                        }
-                        else {
-                            (this._defaultModel.getChildren()[2]).position.y = 0;
-                        }
+                        (this._defaultModel.getChildren()[4]).position.x = triggerDirection * notifyObject.value * 0.0035;
                     }
-                    this.onSecondaryButtonStateChangedObservable.notifyObservers(notifyObject);
+                    this.onSecondaryTriggerStateChangedObservable.notifyObservers(notifyObject);
                     return;
-                case 5:
-                    this.onThumbRestChangedObservable.notifyObservers(notifyObject);
+                case 3:
+                    this.onPadStateChangedObservable.notifyObservers(notifyObject);
+                    return;
+                case 4:
+                    this.onTrackpadChangedObservable.notifyObservers(notifyObject);
                     return;
             }
         };
