@@ -1,14 +1,4 @@
 class CollectedObject {
-  guid() {
-    function s4() {
-      return Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
-    }
-
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-      s4() + '-' + s4() + s4() + s4();
-  }
   id:number
   ref: string
   title: string
@@ -19,11 +9,39 @@ class CollectedObject {
     z:number
   }
   mesh:BABYLON.Mesh
-  constructor(public type:string, public src:string){
+  COLLECTION_KEY = 'collections';
+
+  constructor(public fileType:string, public src:string){
     this.uniqueID = this.guid()
+
+    localStorage.getItem(this.COLLECTION_KEY);
+  }
+
+  // Generate unique ID. 
+  guid() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+      s4() + '-' + s4() + s4() + s4();
   }
 }
 
+class Item {
+  public _id: number;
+  public _x: number;
+  public _y: number;
+  public _z: number;
+  public _scale: number;
+  public _rotation: number; 
+
+  //TODO: constructor with localStorage 
+
+  //TODO: override default getter and setter.
+}
 class Space {
   public _id: number;
   public _src: number;
@@ -38,19 +56,6 @@ class Space {
   }
 
   // TODO: override default getter and setter.
-}
-
-class Item {
-  public _id: number;
-  public _x: number;
-  public _y: number;
-  public _z: number;
-  public _scale: number;
-  public _rotation: number; 
-
-  //TODO: constructor with localStorage 
-
-  //TODO: override default getter and setter.
 }
 
 class Game {
@@ -74,13 +79,15 @@ class Game {
     BABYLON['windowsControllerSrc'] = '/vrTemplate/assets/controllers/wmr/';
   }
 
-  // TODO: load function. 
+  // load accepts png file and glb file.
   async load(root, name):Promise<BABYLON.Mesh> {
-    var item:Promise<BABYLON.Mesh> = new Promise((res, rej) => {
-
-    })
-
-    return item; 
+      var fileExtension = name.split('.').pop();
+      
+      if (fileExtension == 'png') {
+        return this.loadImage(root, name)
+      } else {
+        return this.loadModel(root, name)
+      }
   }
 
   // Load 3D model. 
@@ -109,17 +116,28 @@ class Game {
     return p;
   }
 
-  // 
-  async loadImage(src: string, imageName: string, planeName: string, size: number, pos: [number, number, number]) {
-    var imageMaterial = new BABYLON.StandardMaterial(imageName, this._scene);    
-    var image = BABYLON.Mesh.CreatePlane(planeName, 10.0, this._scene, false, BABYLON.Mesh.DEFAULTSIDE);
+  // loadImage assumes the file format is .png
+  async loadImage(root, name): Promise<BABYLON.Mesh> {
+    var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
+      var filename = name.slice(0, -4);
+      var planeName = filename + 'Plane';
+      var srcPath = '/' + name; 
+      const size = 1.0;  /* Scaling factor for the image is called size. */  
+      var imageMaterial = new BABYLON.StandardMaterial(filename, this._scene);
+      var image = BABYLON.Mesh.CreatePlane(planeName, size, this._scene, false, BABYLON.Mesh.DEFAULTSIDE);
 
-    imageMaterial.diffuseTexture = new BABYLON.Texture(src, this._scene);
-    image.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
-    image.material = imageMaterial;
+      imageMaterial.diffuseTexture = new BABYLON.Texture(srcPath, this._scene);
+      // image.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
+      image.material = imageMaterial;
 
-    return image; 
+      return image; 
+
+    }); 
+    
+    return p; 
+
   }
+
 
   createCursor() {
     var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
@@ -307,15 +325,20 @@ class Game {
 
     this._gazeTarget = new SelectedObject();
 
+    // TODO: replace the below with localStorage. 
     var objects:Array<CollectedObject> = []
     var objectCount = 5
     for (var i = 0; i < objectCount; i++) {
       objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
     }
+    // for (var i = 5; i < 10; i++) {
+    //   objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
+    // }
+
     var index = 0
     objects.forEach((o)=>{
       this._objectMap[o.uniqueID] = o
-      this.loadModel("/", o.src).then((m)=>{
+      this.load("/", o.src).then((m)=>{
         console.log("loaded")
         o.mesh = m
         m.name = o.uniqueID
