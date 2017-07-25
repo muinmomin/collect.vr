@@ -239,6 +239,9 @@ class Game {
       // turn on the cursor back
       this.createCursor();
     }
+    BABYLON.Tools.CreateScreenshot(this._engine, this._camera, 512, (base64img) => {
+      localStorage.setItem('screenshot', base64img);
+    });
   }
 
   async createScene() {
