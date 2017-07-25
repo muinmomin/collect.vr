@@ -5,7 +5,7 @@
       // Open first run (fake website) page on new install/update.
       browser.runtime.onInstalled.addListener((details) => {
             var creating = browser.tabs.create({
-                  url: 'firstrun.html'
+                  url: 'docs/firstrun.html'
             });
       });
 
