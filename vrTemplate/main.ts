@@ -148,7 +148,7 @@ class Game {
     console.log(mesh.name)
     if (this._cursor) {
       // zoom in
-      this._gazeTarget.positionInCollection = mesh.position;
+      this._gazeTarget.positionInCollection = mesh.position.clone();
       mesh.setAbsolutePosition(this._camera.getFrontPosition(this._gazeTarget.GetZoomDistanceToCam()));
       //mesh.scaling = new BABYLON.Vector3(5, 5, 5); - changes the object position weirdly
 
