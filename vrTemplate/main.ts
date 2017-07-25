@@ -436,34 +436,25 @@ class Game {
     // run the render loop
     this._engine.runRenderLoop(() => {
       if (this._gazeTarget.mesh && (this.rotationXState != 0 || this.rotationYState != 0)) {
-        let v: BABYLON.Vector3;
         var forward = this.ray.direction;
         let up = BABYLON.Vector3.Cross(BABYLON.Vector3.Cross(new BABYLON.Vector3(0, 1, 0), forward), forward)
         let side = BABYLON.Vector3.Cross(forward, up);
         if (this.rotationXState == 1) {
-          v = new BABYLON.Vector3(0.105, 0, 0);
           this._gazeTarget.mesh.rotate(side, .105, BABYLON.Space.WORLD);
 
         }
         if (this.rotationXState == -1) {
-          v = new BABYLON.Vector3(-.105, 0, 0);
           this._gazeTarget.mesh.rotate(side, -.105, BABYLON.Space.WORLD);
 
         }
         if (this.rotationYState == 1) {
-          v = new BABYLON.Vector3(0, .105, 0);
           this._gazeTarget.mesh.rotate(up, .105, BABYLON.Space.WORLD);
 
         }
         if (this.rotationYState == -1) {
-          v = new BABYLON.Vector3(0, -.105, 0);
           this._gazeTarget.mesh.rotate(up, -.105, BABYLON.Space.WORLD);
 
         }
-        //v = vecToLocal(v, this._camera);
-        //this._gazeTarget.mesh.rotation.x+=v.x;
-        //this._gazeTarget.mesh.rotation.y+=v.y;
-        //this._gazeTarget.mesh.rotate(this.ray.direction, .105, BABYLON.Space.WORLD);
       }
       this._scene.render();
 
