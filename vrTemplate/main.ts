@@ -32,6 +32,7 @@ class Game {
   private _light: BABYLON.Light;
   private _cursor: BABYLON.Mesh;
   private _gazeTarget: SelectedObject;
+  private objectJump=.8;
 
   constructor(canvasElement: string) {
     // Create canvas and engine
@@ -203,6 +204,22 @@ class Game {
       if (eventArg.key == ' ') {
         this.toggleZoomObjectMode();
       }
+      if((eventArg.keyCode == 85 || eventArg.keyCode==68) && this._gazeTarget){
+        var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
+        while(mesh.parent != null){
+          var other:any = mesh.parent
+          mesh = other
+        }
+        let v=new BABYLON.Vector3(0,0,this.objectJump);
+
+        if((eventArg.keyCode==85)){
+          v.z*=-1;
+        }
+        console.log(v);
+        console.log(mesh.position);
+        mesh.position.z+=v.z;
+        console.log(mesh.position);
+        }
     });
 
     // target the camera to scene origin
