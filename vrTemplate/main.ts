@@ -14,11 +14,12 @@ class Game {
   async loadModel(root, name): Promise<BABYLON.Mesh> {
     var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
       var parent = new BABYLON.Scene(this._engine)
-      BABYLON.SceneLoader.ImportMesh(null, root, name, this._scene, function (meshses) {
+      BABYLON.SceneLoader.ImportMesh(null, root, name, this._scene, (meshses) => {
         var parent = new BABYLON.Mesh("", this._scene)
-        meshses.forEach((m) => {
+        meshses.forEach((m,i)=>{
           //console.log(m.parent == this._scene)
-          if (m.parent == this._scene) {
+          //var other:any = this._scene
+          if(i==0){
             console.log("hit")
             parent.addChild(m)
             //m.parent = parent
@@ -154,6 +155,7 @@ class Game {
 
       //Try to get object x size and bottom y pos
       parent.getChildMeshes().forEach((c) => {
+
         var diff = c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x
         var bottomY = c.getBoundingInfo().boundingBox.minimum.y + c.position.y
         if (isFinite(diff) && diff != 0) {
@@ -162,13 +164,19 @@ class Game {
         }
       })
       //TODO bottom is incorrect?
-      console.log(bottom)
 
+      //console.log(bottom)
+      
       //Put objects randomly in arc in from of camera
-      parent.position.y = 1 + Math.random() * 1
-      var rot = -Math.PI / 2 + (Math.PI * Math.random())
-      parent.position.x = this._camera.position.x + (Math.sin(rot) * 5)//2*(i-objectCount/2)
-      parent.position.z = this._camera.position.z + (Math.cos(rot) * 5)
+      //+Math.random()*1
+      var rowSize = 3
+      var rowIndex = i%rowSize
+      console.log(rowIndex)
+      var colIndex = Math.floor(i/rowSize)
+      var rot = -Math.PI/2+(Math.PI*(rowIndex/(rowSize-1)))
+      parent.position.x = this._camera.position.x + (Math.sin(rot)*5)//2*(i-objectCount/2)
+      parent.position.z = this._camera.position.z + (Math.cos(rot)*5)
+      parent.position.y = 1 + colIndex*2
 
       //Scale to be same size
       var desiredSize = 1
