@@ -5,6 +5,7 @@ class Game {
   private _webVrCamera: BABYLON.WebVRFreeCamera;
   private _camera: BABYLON.FreeCamera;
   private _light: BABYLON.Light;
+  private _cursor: BABYLON.Mesh;
 
   constructor(canvasElement: string) {
     // Create canvas and engine
@@ -38,6 +39,12 @@ class Game {
     return p;
   }
 
+  vecToLocal(vector, mesh): BABYLON.Vector3 {
+    var m = mesh.getWorldMatrix();
+    var v = BABYLON.Vector3.TransformCoordinates(vector, m);
+    return v;
+  }
+
   meshPicker(mesh): boolean {
     if (mesh.name === "skyBox") {
       return false;
@@ -47,19 +54,33 @@ class Game {
       return false;
     }
 
+    if (mesh.name === "cursor") {
+      return false;
+    }
+
     return true;
   }
 
-  pickObjectUnderGaze() {
-    var forward = new BABYLON.Vector3(0, 0, -20); //20units in front on z axis
-    let vec = this._camera.getDirection(forward).add(this._camera.position); //create vector from local axis
-    var ray = new BABYLON.Ray(this._camera.position, vec, 1000); //origin, endpoint, length
+  drawCursor() {
+    var forward = new BABYLON.Vector3(0, 0, -1);
+    forward = this.vecToLocal(forward, this._camera);
+    var origin = this._camera.globalPosition;
 
+    var direction = forward.subtract(origin);
+    direction = BABYLON.Vector3.Normalize(direction);
+
+    var length = 100;
+
+    var ray = new BABYLON.Ray(origin, direction, length);
+   
     var hit = this._scene.pickWithRay(ray, this.meshPicker);
 
-    if (hit && hit.pickedMesh) {
-      console.log("HIT: " + hit.pickedMesh.name);
-      // do the awwesome things
+    if (!hit || !hit.pickedMesh) {
+      //draw cursor no selection
+      this._cursor.position = this._camera.getFrontPosition(length);
+    } else {
+      // selection cursor
+      this._cursor.position = hit.pickedPoint;
     }
   }
 
@@ -97,12 +118,15 @@ class Game {
       console.log("down")
       this._scene.onPointerDown = undefined
       this._camera.attachControl(this._canvas, true);
+      this._cursor = BABYLON.Mesh.CreateSphere("cursor", 10, 0.3, this._scene);
+      var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
+      cursorMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
+      this._cursor.material = cursorMaterial;
+      
+      this._scene.registerBeforeRender(() => { this.drawCursor(); });
     };
 
     window.addEventListener('keydown', (eventArg) => {
-      if (eventArg.keyCode == 32) {
-        this.pickObjectUnderGaze();
-      }
       if (eventArg.key == '`')
         this._scene.debugLayer.show();
     });
