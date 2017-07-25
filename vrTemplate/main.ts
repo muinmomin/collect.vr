@@ -1,13 +1,4 @@
 class CollectedObject {
-  guid() {
-    function s4() {
-      return Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-      s4() + '-' + s4() + s4() + s4();
-  }
   id:number
   ref: string
   title: string
@@ -18,13 +9,58 @@ class CollectedObject {
     z:number
   }
   mesh:BABYLON.Mesh
-  constructor(public type:string, public src:string){
+  COLLECTION_KEY = 'collections';
+
+  constructor(public fileType:string, public src:string){
     this.uniqueID = this.guid()
+
+    localStorage.getItem(this.COLLECTION_KEY);
   }
+
+  // Generate unique ID. 
+  guid() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+      s4() + '-' + s4() + s4() + s4();
+  }
+}
+
+class Item {
+  public _id: number;
+  public _x: number;
+  public _y: number;
+  public _z: number;
+  public _scale: number;
+  public _rotation: number; 
+
+  //TODO: constructor with localStorage 
+
+  //TODO: override default getter and setter.
+}
+class Space {
+  public _id: number;
+  public _src: number;
+  public _title: string;
+  public _collectionsId: Array<number>;
+  private _database: 'collections';
+
+  // TODO: constructor with localstorage
+  constructor() {
+    var collectionsJSON = localStorage.getItem(this._database);
+    
+  }
+
+  // TODO: override default getter and setter.
 }
 
 class Game {
   private _canvas: any;//HTMLCanvasElement;
+  private _show3dButton: any;
   private _engine: BABYLON.Engine;
   private _scene: BABYLON.Scene;
   private _webVrCamera: BABYLON.WebVRFreeCamera;
@@ -33,19 +69,42 @@ class Game {
   private _cursor: BABYLON.Mesh;
   private _gazeTarget: SelectedObject;
   private objectJump=.8;
+<<<<<<< HEAD
   private rotationXState=0;
   private rotationYState=0;
   private ray: BABYLON.Ray;
+=======
+  private _objectMap:Map<string, CollectedObject> = new Map<string, CollectedObject>()
+>>>>>>> 103dd1c1ea613b5670c8bd48b9e468c9ac6267be
 
-  constructor(canvasElement: string) {
+  constructor(canvasElement: string, show3dButtonElement: string) {
     // Create canvas and engine
     this._canvas = document.getElementById(canvasElement);
+    this._show3dButton = document.getElementById(show3dButtonElement);
     this._engine = new BABYLON.Engine(this._canvas, true);
 
+    this._show3dButton.addEventListener('click', () => {
+      this.show3d();
+    });
+    
     // TODO: A total hack here since we aren't bundling the controller models in our custom babylon build
     BABYLON['windowsControllerSrc'] = '/vrTemplate/assets/controllers/wmr/';
   }
 
+  // load accepts png file and glb file.
+  async load(root, name):Promise<BABYLON.Mesh> {
+      var fileExtension = name.split('.').pop();
+      
+      if (fileExtension == 'png') {
+        return this.loadImage(root, name)
+      } else {
+        return this.loadModel(root, name)
+      }
+  }
+
+  // Load 3D model. 
+  // root: /
+  // name: source of the file. 
   async loadModel(root, name): Promise<BABYLON.Mesh> {
     var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
       var parent = new BABYLON.Scene(this._engine)
@@ -69,6 +128,33 @@ class Game {
     return p;
   }
 
+  // loadImage assumes the file format is .png
+  async loadImage(root, name): Promise<BABYLON.Mesh> {
+    var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
+      var filename = name.slice(0, -4);
+      var planeName = filename + 'Plane';
+      var srcPath = '/' + name; 
+      const size = 1.0;  /* Scaling factor for the image is called size. */  
+      var imageMaterial = new BABYLON.StandardMaterial(filename, this._scene);
+      var image = BABYLON.Mesh.CreatePlane(planeName, size, this._scene, false, BABYLON.Mesh.DEFAULTSIDE);
+
+      imageMaterial.diffuseTexture = new BABYLON.Texture(srcPath, this._scene);
+      // image.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
+      image.material = imageMaterial;
+      var m = new BABYLON.Mesh("", this._scene)
+      m.addChild(image)
+      res(m)
+
+    }); 
+    
+    return p; 
+
+  }
+
+  show3d() {
+    this._camera.attachControl(this._canvas, true);
+  }
+  
   createCursor() {
     var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
     cursorMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
@@ -111,6 +197,12 @@ class Game {
       // gaze sees a new object
       if (!this._gazeTarget.mesh || this._gazeTarget.mesh != hit.pickedMesh) {
         this._gazeTarget.mesh = hit.pickedMesh;
+        var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
+        while(mesh.parent != null){
+          var other:any = mesh.parent
+          mesh = other
+        }
+        this._gazeTarget.mesh = mesh
         this.addObjectHighlight(this._gazeTarget);
       }
     }
@@ -142,14 +234,11 @@ class Game {
     }
 
     var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
-    while(mesh.parent != null){
-      var other:any = mesh.parent
-      mesh = other
-    }
     console.log(mesh.name)
+    console.log(this._objectMap[mesh.name])
     if (this._cursor) {
       // zoom in
-      this._gazeTarget.positionInCollection = mesh.position;
+      this._gazeTarget.positionInCollection = mesh.position.clone();
       mesh.setAbsolutePosition(this._camera.getFrontPosition(this._gazeTarget.GetZoomDistanceToCam()));
       //mesh.scaling = new BABYLON.Vector3(5, 5, 5); - changes the object position weirdly
 
@@ -165,6 +254,9 @@ class Game {
       // turn on the cursor back
       this.createCursor();
     }
+    BABYLON.Tools.CreateScreenshot(this._engine, this._camera, 512, (base64img) => {
+      localStorage.setItem('screenshot', base64img);
+    }, 'png');
   }
 
   async createScene() {
@@ -191,14 +283,8 @@ class Game {
       this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, 0), this._scene);
     }
 
-    this._scene.onPointerDown = () => {
-      console.log("down")
-      this._scene.onPointerDown = undefined
-      this._camera.attachControl(this._canvas, true);
-
-      this.createCursor();      
-      this._scene.registerBeforeRender(() => { this.updateCursor(); });
-    };
+    this.createCursor();      
+    this._scene.registerBeforeRender(() => { this.updateCursor(); });
 
     window.addEventListener('keydown', (eventArg) => {
       if (eventArg.key == '`')
@@ -209,12 +295,16 @@ class Game {
       }
       if((eventArg.keyCode == 85 || eventArg.keyCode==74) && this._gazeTarget){
         var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
+<<<<<<< HEAD
         while(mesh.parent != null){
           var other:any = mesh.parent
           mesh = other
         }
         //let v=new BABYLON.Vector3(0,0,this.objectJump);
         var v = this.ray.direction.clone().normalize()//.multiplyByFloats(0.8,)
+=======
+        let v=new BABYLON.Vector3(0,0,this.objectJump);
+>>>>>>> 103dd1c1ea613b5670c8bd48b9e468c9ac6267be
 
         if((eventArg.keyCode==85)){
           //v.z*=-1;
@@ -260,7 +350,7 @@ class Game {
     // create the skybox cubemap
     var skybox = BABYLON.Mesh.CreateBox("skyBox", 10000, this._scene);
     var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this._scene);
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("Textures/sky7/sky7", this._scene);
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("Textures/grad1/grad1", this._scene);
     skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
     skyboxMaterial.backFaceCulling = false;
     skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
@@ -279,16 +369,23 @@ class Game {
 
     this._gazeTarget = new SelectedObject();
 
+    // TODO: replace the below with localStorage. 
     var objects:Array<CollectedObject> = []
     var objectCount = 5
     for (var i = 0; i < objectCount; i++) {
       objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
     }
+    for (var i = 5; i < 10; i++) {
+      objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
+    }
+
     var index = 0
     objects.forEach((o)=>{
-      this.loadModel("/", o.src).then((m)=>{
+      this._objectMap[o.uniqueID] = o
+      this.load("/", o.src).then((m)=>{
         console.log("loaded")
         o.mesh = m
+        
         m.name = o.uniqueID
         console.log(m.name)
 
@@ -320,6 +417,7 @@ class Game {
         m.scaling.x = desiredSize / size
         m.scaling.y = desiredSize / size
         m.scaling.z = desiredSize / size
+        m.lookAt(new BABYLON.Vector3(0,1,0))
         index++
       })
     })
@@ -372,7 +470,7 @@ class Game {
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Create the game using the 'renderCanvas'
-  let game = new Game('renderCanvas');
+  let game = new Game('renderCanvas', 'show3dButton');
 
   // Create the scene
   await game.createScene();
