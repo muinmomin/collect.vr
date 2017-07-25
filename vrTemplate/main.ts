@@ -137,7 +137,11 @@ class Game {
       return;
     }
 
-    var mesh = this._gazeTarget.mesh;
+    var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
+    while(mesh.parent != null){
+      var other:any = mesh.parent
+      mesh = other
+    }
     console.log(mesh.name)
     if (this._cursor) {
       // zoom in
