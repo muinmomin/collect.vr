@@ -4,8 +4,9 @@
     "description": "collect.vr",
     "author": "Author",
     "icons": {
-       "20": "assets/Logo20.png",
-        "40": "assets/Logo40.png"
+        "16": "docs/assets/Logo16.png",
+        "20": "docs/assets/Logo20.png",
+        "40": "docs/assets/Logo40.png"
     },
     "browser_action": {
         "default_icon": {
