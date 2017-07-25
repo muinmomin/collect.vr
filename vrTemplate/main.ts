@@ -248,6 +248,9 @@ class Game {
       // turn on the cursor back
       this.createCursor();
     }
+    BABYLON.Tools.CreateScreenshot(this._engine, this._camera, 512, (base64img) => {
+      localStorage.setItem('screenshot', base64img);
+    }, 'png');
   }
 
   async createScene() {
@@ -345,6 +348,7 @@ class Game {
       this.load("/", o.src).then((m)=>{
         console.log("loaded")
         o.mesh = m
+        
         m.name = o.uniqueID
         console.log(m.name)
 
@@ -376,6 +380,7 @@ class Game {
         m.scaling.x = desiredSize / size
         m.scaling.y = desiredSize / size
         m.scaling.z = desiredSize / size
+        m.lookAt(new BABYLON.Vector3(0,1,0))
         index++
       })
     })
