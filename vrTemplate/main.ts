@@ -71,7 +71,7 @@ class Game {
       this._scene.onPointerDown = undefined
       this._camera.attachControl(this._canvas, true);
       
-      if (this._webVrCamera !== null) {
+      if (this._webVrCamera) {
         this._webVrCamera.controllers.forEach((gp) => {
           console.log('Found a gamepad: ' + gp.id);
           // Hacky mc hackface
@@ -120,7 +120,7 @@ class Game {
     //BABYLON.SceneLoader.ImportMesh()
     for(var i = 0;i<5;i++){
       var meshName = "Duck"
-      var parent = await this.loadModel("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/"+meshName+"/glTF/", meshName+".gltf")
+      var parent = await this.loadModel("assets/Duck/", meshName+".gltf")
       parent.position.x = 2*i
     }
 
