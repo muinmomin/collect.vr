@@ -14,12 +14,12 @@
             "20": "docs/assets/Logo20.png",
             "40": "docs/assets/Logo40.png"
         },
-        "default_title": "collect.vr",
-        "default_popup": "popup.html"
+        "default_title": "collect.vr"
     },
     "permissions": [
         "contextMenus",
         "tabs",
+        "activeTab",
         "storage",
         "activeTab",
         "<all_urls>"
