@@ -5,6 +5,7 @@ class CollectedObject {
         .toString(16)
         .substring(1);
     }
+
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
       s4() + '-' + s4() + s4() + s4();
   }
@@ -21,6 +22,35 @@ class CollectedObject {
   constructor(public type:string, public src:string){
     this.uniqueID = this.guid()
   }
+}
+
+class Space {
+  public _id: number;
+  public _src: number;
+  public _title: string;
+  public _collectionsId: Array<number>;
+  private _database: 'collections';
+
+  // TODO: constructor with localstorage
+  constructor() {
+    var collectionsJSON = localStorage.getItem(this._database);
+    
+  }
+
+  // TODO: override default getter and setter.
+}
+
+class Item {
+  public _id: number;
+  public _x: number;
+  public _y: number;
+  public _z: number;
+  public _scale: number;
+  public _rotation: number; 
+
+  //TODO: constructor with localStorage 
+
+  //TODO: override default getter and setter.
 }
 
 class Game {
@@ -43,7 +73,19 @@ class Game {
     // TODO: A total hack here since we aren't bundling the controller models in our custom babylon build
     BABYLON['windowsControllerSrc'] = '/vrTemplate/assets/controllers/wmr/';
   }
-  
+
+  // TODO: load function. 
+  async load(root, name):Promise<BABYLON.Mesh> {
+    var item:Promise<BABYLON.Mesh> = new Promise((res, rej) => {
+
+    })
+
+    return item; 
+  }
+
+  // Load 3D model. 
+  // root: /
+  // name: source of the file. 
   async loadModel(root, name): Promise<BABYLON.Mesh> {
     var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
       var parent = new BABYLON.Scene(this._engine)
@@ -65,6 +107,18 @@ class Game {
       var m = new BABYLON.Mesh(null, null);
     });
     return p;
+  }
+
+  // 
+  async loadImage(src: string, imageName: string, planeName: string, size: number, pos: [number, number, number]) {
+    var imageMaterial = new BABYLON.StandardMaterial(imageName, this._scene);    
+    var image = BABYLON.Mesh.CreatePlane(planeName, 10.0, this._scene, false, BABYLON.Mesh.DEFAULTSIDE);
+
+    imageMaterial.diffuseTexture = new BABYLON.Texture(src, this._scene);
+    image.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
+    image.material = imageMaterial;
+
+    return image; 
   }
 
   createCursor() {
