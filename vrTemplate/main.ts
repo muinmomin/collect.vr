@@ -5,6 +5,7 @@ class Game {
   private _webVrCamera: BABYLON.WebVRFreeCamera;
   private _camera: BABYLON.FreeCamera;
   private _light: BABYLON.Light;
+  private _cursor: BABYLON.Mesh;
 
   constructor(canvasElement: string) {
     // Create canvas and engine
@@ -44,7 +45,29 @@ class Game {
       return false;
     }
 
+    if (mesh.name === "cursor") {
+      return false;
+    }
+
     return true;
+  }
+
+  drawCursor() {
+    var forward = new BABYLON.Vector3(0, 0, -20); //20units in front on z axis
+    let vec = this._camera.getDirection(forward).add(this._camera.position); //create vector from local axis
+    var ray = new BABYLON.Ray(this._camera.position, vec, 1000); //origin, endpoint, length
+
+    var hit = this._scene.pickWithRay(ray, this.meshPicker);
+
+    if (!hit || !hit.pickedMesh) {
+      //draw cursor no selection
+      this._cursor.position = vec;
+      this._cursor.scaling = new BABYLON.Vector3(1, 1, 1);
+    } else {
+      // selection cursor
+      this._cursor.position = hit.pickedPoint;
+      this._cursor.scaling = new BABYLON.Vector3(2, 2, 2);
+    }
   }
 
   pickObjectUnderGaze() {
@@ -55,8 +78,9 @@ class Game {
     var hit = this._scene.pickWithRay(ray, this.meshPicker);
 
     if (hit && hit.pickedMesh) {
-      console.log("HIT: " + hit.pickedMesh.name);
-      // do the awwesome things
+      var mesh = hit.pickedMesh;
+      console.log("HIT: " + mesh.name);
+      return mesh;
     }
   }
 
