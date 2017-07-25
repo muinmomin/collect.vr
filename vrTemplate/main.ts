@@ -1,3 +1,29 @@
+class CollectedObject {
+  guid() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+      s4() + '-' + s4() + s4() + s4();
+  }
+  id:number
+  ref: string
+  title: string
+  uniqueID: string
+  pos: {
+    x:number
+    y:number
+    z:number
+  }
+  mesh:BABYLON.Mesh
+  constructor(public type:string, public src:string){
+    this.uniqueID = this.guid()
+  }
+}
+
 class Space {
   public _id: number;
   public _src: number;
@@ -31,35 +57,164 @@ class Game {
   private _canvas: any;//HTMLCanvasElement;
   private _engine: BABYLON.Engine;
   private _scene: BABYLON.Scene;
+  private _webVrCamera: BABYLON.WebVRFreeCamera;
   private _camera: BABYLON.FreeCamera;
   private _light: BABYLON.Light;
+  private _cursor: BABYLON.Mesh;
+  private _gazeTarget: SelectedObject;
 
   constructor(canvasElement: string) {
     // Create canvas and engine
     this._canvas = document.getElementById(canvasElement);
     this._engine = new BABYLON.Engine(this._canvas, true);
+
+    // TODO: A total hack here since we aren't bundling the controller models in our custom babylon build
+    BABYLON['windowsControllerSrc'] = '/vrTemplate/assets/controllers/wmr/';
   }
 
-  async loadModel(root, name):Promise<BABYLON.Mesh>{
-    var p:Promise<BABYLON.Mesh> = new Promise((res, rej)=>{
+  // TODO: load function. 
+  async load(root, name):Promise<BABYLON.Mesh> {
+    var item:Promise<BABYLON.Mesh> = new Promise((res, rej) => {
+
+    })
+
+    return item; 
+  }
+
+  // Load 3D model. 
+  // root: /
+  // name: source of the file. 
+  async loadModel(root, name): Promise<BABYLON.Mesh> {
+    var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
       var parent = new BABYLON.Scene(this._engine)
-      BABYLON.SceneLoader.ImportMesh(null, root, name, this._scene, function (meshses) {
+      BABYLON.SceneLoader.ImportMesh(null, root, name, this._scene, (meshses) => {
         var parent = new BABYLON.Mesh("", this._scene)
-        meshses.forEach((m)=>{
+        meshses.forEach((m,i)=>{
           //console.log(m.parent == this._scene)
-          if(m.parent == this._scene){
+          //var other:any = this._scene
+          if(!m.parent){
             console.log("hit")
-            parent.addChild(m)
+            m.setParent(parent);
             //m.parent = parent
           }
         })
         res(parent);
-      }, null, function (scene) {
-          rej("failed to load model")
+      }, null, function (scene, message) {
+        rej(message)
       })
-      var m = new BABYLON.Mesh(null,null);
+      var m = new BABYLON.Mesh(null, null);
     });
     return p;
+  }
+
+  // 
+  async loadImage(src: string, imageName: string, planeName: string, size: number, pos: [number, number, number]) {
+    var imageMaterial = new BABYLON.StandardMaterial(imageName, this._scene);    
+    var image = BABYLON.Mesh.CreatePlane(planeName, 10.0, this._scene, false, BABYLON.Mesh.DEFAULTSIDE);
+
+    imageMaterial.diffuseTexture = new BABYLON.Texture(src, this._scene);
+    image.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
+    image.material = imageMaterial;
+
+    return image; 
+  }
+
+  createCursor() {
+    var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
+    cursorMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
+
+    this._cursor = BABYLON.Mesh.CreateSphere("cursor", 10, 0.3, this._scene);
+    this._cursor.material = cursorMaterial;
+    this._cursor.isPickable = false;
+  }
+
+  updateCursor() {
+    if (!this._cursor)
+      return;
+
+    var forward = new BABYLON.Vector3(0, 0, -1);
+    forward = vecToLocal(forward, this._camera);
+    var origin = this._camera.globalPosition;
+
+    var direction = forward.subtract(origin);
+    direction = BABYLON.Vector3.Normalize(direction);
+
+    var length = 30;
+
+    var ray = new BABYLON.Ray(origin, direction, length);
+   
+    var hit = this._scene.pickWithRay(ray, null);
+
+    if (!hit || !hit.pickedMesh) {
+      // draw cursor no selection
+      this._cursor.position = this._camera.getFrontPosition(length);
+
+      // gaze removed from an object
+      if (this._gazeTarget.mesh) {
+        this.removeObjectHighlight(this._gazeTarget);
+        this._gazeTarget.mesh = undefined;
+      }
+    } else {
+      // selection cursor
+      this._cursor.position = hit.pickedPoint;
+
+      // gaze sees a new object
+      if (!this._gazeTarget.mesh || this._gazeTarget.mesh != hit.pickedMesh) {
+        this._gazeTarget.mesh = hit.pickedMesh;
+        this.addObjectHighlight(this._gazeTarget);
+      }
+    }
+  }
+
+  removeObjectHighlight(selectedObject) {
+    if (!selectedObject.mesh || !selectedObject.mesh.name) {
+      console.error("Can't hightlight mesh: " + selectedObject);
+      return;
+    }
+
+    console.debug("hideMenuOptions for: " + selectedObject.mesh.name);
+  }
+
+  addObjectHighlight(selectedObject) {
+    if (!selectedObject.mesh || !selectedObject.mesh.name) {
+      console.error("Can't hightlight mesh: " + selectedObject);
+      return;
+    }
+
+    // getObjectDetails(mesh.name);
+    console.debug("showMenuOptions for: " + selectedObject.mesh.name);
+  }
+
+  toggleZoomObjectMode() {
+    if (!this._gazeTarget.mesh) {
+      console.debug("No object picked");
+      return;
+    }
+
+    var mesh:BABYLON.AbstractMesh = this._gazeTarget.mesh;
+    while(mesh.parent != null){
+      var other:any = mesh.parent
+      mesh = other
+    }
+    console.log(mesh.name)
+    if (this._cursor) {
+      // zoom in
+      this._gazeTarget.positionInCollection = mesh.position;
+      mesh.setAbsolutePosition(this._camera.getFrontPosition(this._gazeTarget.GetZoomDistanceToCam()));
+      //mesh.scaling = new BABYLON.Vector3(5, 5, 5); - changes the object position weirdly
+
+      // turn off the cursor
+      this._cursor.dispose();
+      this._cursor = undefined;
+    }
+    else {
+      // zoom out
+      //mesh.scaling = new BABYLON.Vector3(1, 1, 1);
+      mesh.position = this._gazeTarget.positionInCollection;
+
+      // turn on the cursor back
+      this.createCursor();
+    }
   }
 
   async createScene() {
@@ -69,49 +224,46 @@ class Game {
 
     var headset = null;
     // If a VR headset is connected, get its info
-    if(navigator.getVRDisplays){
+    if (navigator.getVRDisplays) {
       var displays = await navigator.getVRDisplays()
       if (displays[0]) {
         headset = displays[0];
-        console.log(headset)
       }
-      console.log("hit3")
     }
 
     if (headset) {
       // Create a WebVR camera with the trackPosition property set to false so that we can control movement with the gamepad
-      this._camera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, -10), this._scene, { trackPosition: false });
+      this._camera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, 0), this._scene, { trackPosition: true });
+
       //this._camera.deviceScaleFactor = 1;
     } else {
-      // create a FreeCamera, and set its position to (x:0, y:5, z:-10)
-      this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 1.5, -10), this._scene);
-
-      //  this._camera = new BABYLON.ArcRotateCamera("camera", 4.712, 1.571, 0.05, BABYLON.Vector3.Zero(), this._scene);
-      //   this._camera.attachControl(this._canvas, true);
-      //   this._camera.wheelPrecision = 100.0;
-      //   this._camera.minZ = 0.01;
-      //   this._camera.maxZ = 1000;
+      // create a FreeCamera, and set its position to (x:0, y:0, z:-10)
+      this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, -10), this._scene);
     }
 
     this._scene.onPointerDown = () => {
       console.log("down")
       this._scene.onPointerDown = undefined
       this._camera.attachControl(this._canvas, true);
-    }
 
+      this.createCursor();      
+      this._scene.registerBeforeRender(() => { this.updateCursor(); });
+    };
+
+    window.addEventListener('keydown', (eventArg) => {
+      if (eventArg.key == '`')
+        this._scene.debugLayer.show();
+
+      if (eventArg.key == ' ') {
+        this.toggleZoomObjectMode();
+      }
+    });
 
     // target the camera to scene origin
     this._camera.setTarget(BABYLON.Vector3.Zero());
 
     // attach the camera to the canvas
     this._camera.attachControl(this._canvas, false);
-
-    // BABYLON.SceneLoader.Load("./glTF-Sample-Models/2.0/Duck/glTF-Embedded", "duck.gltf", this._engine, function (scene) { 
-    //   console.log(scene)
-    //   // do somethings with the scene
-    // });
-
-   
 
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     this._light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), this._scene);
@@ -125,41 +277,66 @@ class Game {
     skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     skybox.material = skyboxMaterial;
+    skybox.isPickable = false;
 
     // create the ground (round platform)
     var groundMaterial = new BABYLON.StandardMaterial("ground", this._scene);
-    groundMaterial.diffuseTexture = new BABYLON.Texture("Textures/polar_grid.png", this._scene);
+    groundMaterial.diffuseTexture = new BABYLON.Texture("textures/polar_grid.png", this._scene);
     var ground = BABYLON.Mesh.CreateCylinder("ground", 0.1, 3, 3, 100, 10, this._scene);
     // the user should see the ground below
-    ground.position = new BABYLON.Vector3(0, 0, -10);
+    ground.position = new BABYLON.Vector3(0, -1.5, -10);
     ground.material = groundMaterial;
+    ground.isPickable = false;
 
-    // show 2D images
-    // For now, it uses only gallium-4.png file. 
-    // TODO: use AssetsManager to show multiple files
-    var imageMaterial = new BABYLON.StandardMaterial("2DImage1", this._scene);
-    imageMaterial.diffuseTexture = new BABYLON.Texture("Textures/gallium-4.png", this._scene);
-    var image = BABYLON.Mesh.CreatePlane("plane", 10.0, this._scene, true, BABYLON.Mesh.DEFAULTSIDE);
-    // The image should be around the user in a relative short distance. 
-    image.position = new BABYLON.Vector3(5, 5, 2);
-    image.material = imageMaterial;
+    this._gazeTarget = new SelectedObject();
 
-    // // create a built-in "sphere" shape; with 16 segments and diameter of 2
-    // let sphere = BABYLON.MeshBuilder.CreateSphere('sphere1',
-    //   { segments: 16, diameter: 2 }, this._scene);
-
-    // // move the sphere upward 1/2 of its height
-    // sphere.position.y = 1;
-    //   BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING
-    
-    //BABYLON.SceneLoader.ImportMesh()
-    for(var i = 0;i<5;i++){
-      var meshName = "Duck"
-      var parent = await this.loadModel("https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/"+meshName+"/glTF/", meshName+".gltf")
-      parent.position.x = 2*i
+    var objects:Array<CollectedObject> = []
+    var objectCount = 5
+    for (var i = 0; i < objectCount; i++) {
+      objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
     }
-  }
+    var index = 0
+    objects.forEach((o)=>{
+      this.loadModel("/", o.src).then((m)=>{
+        console.log("loaded")
+        o.mesh = m
+        m.name = o.uniqueID
+        console.log(m.name)
 
+        var size = 0
+        var bottom = Infinity
+
+        //Try to get object x size and bottom y pos
+        m.getChildMeshes().forEach((c) => {
+          var diff = c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x
+          var bottomY = c.getBoundingInfo().boundingBox.minimum.y + c.position.y
+          if (isFinite(diff) && diff != 0) {
+            size = Math.max(size, c.getBoundingInfo().boundingBox.maximumWorld.x - c.getBoundingInfo().boundingBox.minimumWorld.x)
+            bottom = Math.min(bottom, bottomY)
+          }
+        })
+        //TODO bottom is incorrect?
+        var startPos= new BABYLON.Vector3(0, 0, -10)
+
+        var rowSize = 3
+        var rowIndex = index%rowSize
+        var colIndex = Math.floor(index/rowSize)
+        var rot = -Math.PI/2+(Math.PI*(rowIndex/(rowSize-1)))
+        m.position.x = startPos.x + (Math.sin(rot)*5)//2*(i-objectCount/2)
+        m.position.z = startPos.z + (Math.cos(rot)*5)
+        m.position.y = 1 + colIndex*2
+
+        //Scale to be same size
+        var desiredSize = 1
+        m.scaling.x = desiredSize / size
+        m.scaling.y = desiredSize / size
+        m.scaling.z = desiredSize / size
+        index++
+      })
+    })
+    
+  }
+  
   animate(): void {
     // run the render loop
     this._engine.runRenderLoop(() => {
@@ -183,3 +360,19 @@ window.addEventListener('DOMContentLoaded', async () => {
   // start animation
   game.animate();
 });
+
+/* Utilities */
+class SelectedObject {
+  public GetZoomDistanceToCam(): number {
+    return 2; // we might want to calculate based on the object size
+  }
+
+  public mesh: BABYLON.AbstractMesh;
+  public positionInCollection: BABYLON.Vector3;
+}
+
+var vecToLocal = function (vector, mesh): BABYLON.Vector3 {
+  var m = mesh.getWorldMatrix();
+  var v = BABYLON.Vector3.TransformCoordinates(vector, m);
+  return v;
+}
