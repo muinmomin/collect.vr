@@ -14,7 +14,21 @@
             title: 'Collect',
             contexts: ['all']
       });
-      
+
+      function urlToBase64(url, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                  var reader = new FileReader();
+                  reader.onloadend = function () {
+                        callback(reader.result);
+                  }
+                  reader.readAsDataURL(xhr.response);
+            };
+            xhr.open('GET', url);
+            xhr.responseType = 'blob';
+            xhr.send();
+      }
+
       // Captures data from right click and saves to local storage.
       browser.contextMenus.onClicked.addListener((info, tab) => {
 
@@ -46,7 +60,7 @@
                   obj['src'] = info.selectionText;
                   obj['type'] = 'text';
             }
-            
+
             console.log(obj);
 
             var collections = localStorage.getItem(COLLECTION_KEY) ? localStorage.getItem(COLLECTION_KEY) : '[]';
