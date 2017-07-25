@@ -1,5 +1,5 @@
 (function () {
-    browser.browserAction.onClicked.addListener((tab) => {
-        
-    })
+      browser.browserAction.onClicked.addListener((tab) => {
+            alert('flyout');
+      })
 });
