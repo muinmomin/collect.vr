@@ -1,3 +1,27 @@
+class Space {
+  public _id;
+  public _src;
+  public _title;
+  public _collections;
+
+  // TODO: constructor with localstorage
+
+  // TODO: override default getter and setter.
+}
+
+class Item {
+  public _id;
+  public _x;
+  public _y;
+  public _z;
+  public _scale;
+  public _rotation; 
+
+  //TODO: constructor with localStorage 
+
+  //TODO: override default getter and setter.
+}
+
 class Game {
   private _canvas: any;//HTMLCanvasElement;
   private _engine: BABYLON.Engine;
@@ -99,11 +123,21 @@ class Game {
 
     // create the ground (round platform)
     var groundMaterial = new BABYLON.StandardMaterial("ground", this._scene);
-    groundMaterial.diffuseTexture = new BABYLON.Texture("textures/polar_grid.png", this._scene);
+    groundMaterial.diffuseTexture = new BABYLON.Texture("Textures/polar_grid.png", this._scene);
     var ground = BABYLON.Mesh.CreateCylinder("ground", 0.1, 3, 3, 100, 10, this._scene);
     // the user should see the ground below
     ground.position = new BABYLON.Vector3(0, 0, -10);
     ground.material = groundMaterial;
+
+    // show 2D images
+    // For now, it uses only gallium-4.png file. 
+    // TODO: use AssetsManager to show multiple files
+    var imageMaterial = new BABYLON.StandardMaterial("2DImage1", this._scene);
+    imageMaterial.diffuseTexture = new BABYLON.Texture("Textures/gallium-4.png", this._scene);
+    var image = BABYLON.Mesh.CreatePlane("plane", 10.0, this._scene, true, BABYLON.Mesh.DEFAULTSIDE);
+    // The image should be around the user in a relative short distance. 
+    image.position = new BABYLON.Vector3(5, 5, 2);
+    image.material = imageMaterial;
 
     // // create a built-in "sphere" shape; with 16 segments and diameter of 2
     // let sphere = BABYLON.MeshBuilder.CreateSphere('sphere1',
