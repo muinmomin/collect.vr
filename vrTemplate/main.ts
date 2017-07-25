@@ -81,17 +81,13 @@ class Game {
 
   // load accepts png file and glb file.
   async load(root, name):Promise<BABYLON.Mesh> {
-    var p:Promise<BABYLON.Mesh> = new Promise((res, rej) => {
       var fileExtension = name.split('.').pop();
       
-      if (fileExtension = 'png') {
-        this.loadImage(root, name);
+      if (fileExtension == 'png') {
+        return this.loadImage(root, name)
       } else {
-        this.loadModel(root, name);
+        return this.loadModel(root, name)
       }
-    })
-
-    return p; 
   }
 
   // Load 3D model. 
@@ -125,7 +121,7 @@ class Game {
     var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
       var filename = name.slice(0, -4);
       var planeName = filename + 'Plane';
-      var srcPath = '../docs/assets/' + name; 
+      var srcPath = '/' + name; 
       const size = 1.0;  /* Scaling factor for the image is called size. */  
       var imageMaterial = new BABYLON.StandardMaterial(filename, this._scene);
       var image = BABYLON.Mesh.CreatePlane(planeName, size, this._scene, false, BABYLON.Mesh.DEFAULTSIDE);
@@ -335,9 +331,9 @@ class Game {
     for (var i = 0; i < objectCount; i++) {
       objects.push(new CollectedObject("3D", "docs/assets/Avocado.glb"))
     }
-    for (var i = 5; i < 10; i++) {
-      objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
-    }
+    // for (var i = 5; i < 10; i++) {
+    //   objects.push(new CollectedObject("2D", "docs/assets/gallium.png"));
+    // }
 
     var index = 0
     objects.forEach((o)=>{
