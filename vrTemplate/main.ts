@@ -184,7 +184,7 @@ class Game {
       //this._camera.deviceScaleFactor = 1;
     } else {
       // create a FreeCamera, and set its position to (x:0, y:0, z:-10)
-      this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, -10), this._scene);
+      this._camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, 0), this._scene);
     }
 
     this._scene.onPointerDown = () => {
@@ -230,7 +230,7 @@ class Game {
     groundMaterial.diffuseTexture = new BABYLON.Texture("textures/polar_grid.png", this._scene);
     var ground = BABYLON.Mesh.CreateCylinder("ground", 0.1, 3, 3, 100, 10, this._scene);
     // the user should see the ground below
-    ground.position = new BABYLON.Vector3(0, -1.5, -10);
+    ground.position = new BABYLON.Vector3(0, -1.5, 0);
     ground.material = groundMaterial;
     ground.isPickable = false;
 
@@ -262,7 +262,7 @@ class Game {
           }
         })
         //TODO bottom is incorrect?
-        var startPos= new BABYLON.Vector3(0, 0, -10)
+        var startPos= new BABYLON.Vector3(0, 0, 0)
 
         var rowSize = 3
         var rowIndex = index%rowSize
