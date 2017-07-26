@@ -8,7 +8,7 @@ button
     background-color:transparent;
     border:none;
     font-family: "Segoe UI";
-    font-size: 1.25em;
+    font-size: 1.1em;
 }
 
 #main
@@ -19,9 +19,9 @@ button
 #your-space
 {
     font-family: "Segoe UI Semibold";
-    font-size:1.25em;
+    font-size:1.5em;
 }
-#bottom-buttons
+.bottom-buttons
 {
     background: none;
 }
@@ -56,12 +56,13 @@ button
 .content-text
 {
     font-family: "Segoe UI";
+    font-size:1.1em;
     color:gray;
 }
 
 .content-text-small
 {
-    font-size: .75em;
+    font-size: 1em;
 }
 
 #right-click-icon
