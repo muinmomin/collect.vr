@@ -27,8 +27,8 @@ class CollectedObject {
         var m = this.mesh        
         
         var rot = (-Math.PI / 4) + ((Math.PI/2) * (rowIndex / (rowSize - 1)))
-        m.position.x = startPos.x + (Math.sin(rot) * 5)//2*(i-objectCount/2)
-        m.position.z = startPos.z + (Math.cos(rot) * 5)
+        m.position.x = startPos.x + (Math.sin(rot) * 6)//2*(i-objectCount/2)
+        m.position.z = startPos.z + (Math.cos(rot) * 6)
         m.position.y = -1 + colIndex * 2
 
         //Scale to be same size
