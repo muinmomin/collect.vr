@@ -23,13 +23,13 @@ class CollectedObject {
       this.pos.y = colIndex
         var startPos = new BABYLON.Vector3(0, 0, 0)
 
-        var rowSize = 3
+        var rowSize = 4
         var m = this.mesh        
         
-        var rot = -Math.PI / 2 + (Math.PI * (rowIndex / (rowSize - 1)))
+        var rot = (-Math.PI / 4) + ((Math.PI/2) * (rowIndex / (rowSize - 1)))
         m.position.x = startPos.x + (Math.sin(rot) * 5)//2*(i-objectCount/2)
         m.position.z = startPos.z + (Math.cos(rot) * 5)
-        m.position.y = 1 + colIndex * 2
+        m.position.y = -1 + colIndex * 2
 
         //Scale to be same size
         
@@ -349,20 +349,23 @@ class Game {
       if (eventArg.keyCode == 68) {  //right aka d
         this.rotationYState = 1;
       }
-      var o:CollectedObject = this._space._objectMap[this._gazeTarget.mesh.name]
-      console.log(this._gazeTarget.mesh.name)
-      if (eventArg.keyCode == 73) { //up aka w
-        o.setPosition(o.pos.x,o.pos.y+1)
+      if(this._gazeTarget.mesh){
+        var o:CollectedObject = this._space._objectMap[this._gazeTarget.mesh.name]
+        console.log(this._gazeTarget.mesh.name)
+        if (eventArg.keyCode == 73) { //up aka w
+          o.setPosition(o.pos.x,o.pos.y+1)
+        }
+        if (eventArg.keyCode == 74) { //left aka a
+          o.setPosition(o.pos.x+1,o.pos.y)
+        }
+        if (eventArg.keyCode == 75) { //down aka s
+          o.setPosition(o.pos.x,o.pos.y-1)
+        }
+        if (eventArg.keyCode == 76) {  //right aka d
+          o.setPosition(o.pos.x-1,o.pos.y)
+        }
       }
-      if (eventArg.keyCode == 74) { //left aka a
-        o.setPosition(o.pos.x+1,o.pos.y)
-      }
-      if (eventArg.keyCode == 75) { //down aka s
-        o.setPosition(o.pos.x,o.pos.y-1)
-      }
-      if (eventArg.keyCode == 76) {  //right aka d
-        o.setPosition(o.pos.x-1,o.pos.y)
-      }
+      
       
     });
     window.addEventListener('keyup', (eventArg) => {
@@ -402,12 +405,18 @@ class Game {
     skybox.material = skyboxMaterial;
     skybox.isPickable = false;
 
+    var wire = BABYLON.Mesh.CreateSphere("wireframeBackground", 4, 60, this._scene);
+    wire.material = new BABYLON.StandardMaterial("wireframeBackground", this._scene);
+    wire.material.wireframe = true;
+    wire.material.alpha = 0.1;
+
     // create the ground (round platform)
     this.load("assets/", "Stage03.glb").then((m) => {
       // the user should see the ground below
-      m.position.y = -50;
-      m.scaling.x = 3;
-      m.scaling.z = 3;
+      m.position.y = -2;
+       m.scaling.y = 0.1;
+      m.scaling.x = 0.1;
+      m.scaling.z = 0.1;
       m.isPickable = false;
     });
     
@@ -456,7 +465,7 @@ class Game {
         m.scaling.y = desiredSize / size
         m.scaling.z = desiredSize / size
 
-        var rowSize = 3
+        var rowSize = 4
         o.setPosition(index % rowSize,Math.floor(index / rowSize))
         //TODO bottom is incorrect?
         
