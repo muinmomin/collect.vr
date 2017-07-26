@@ -12,12 +12,29 @@ class CollectedObject {
   COLLECTION_KEY = 'collections';
 
   constructor(public fileType: string, public src: string) {
+    this.pos = {x:0,y:0,z:0}
     this.uniqueID = this.guid()
 
     var rawCollections = localStorage.getItem(this.COLLECTION_KEY) ? localStorage.getItem(this.COLLECTION_KEY) : [];
 
   }
+  setPosition(rowIndex,colIndex?){
+      this.pos.x = rowIndex
+      this.pos.y = colIndex
+        var startPos = new BABYLON.Vector3(0, 0, 0)
 
+        var rowSize = 3
+        var m = this.mesh        
+        
+        var rot = (-Math.PI / 4) + ((Math.PI/2) * (rowIndex / (rowSize - 1)))
+        m.position.x = startPos.x + (Math.sin(rot) * 5)//2*(i-objectCount/2)
+        m.position.z = startPos.z + (Math.cos(rot) * 5)
+        m.position.y = 1 + colIndex * 2
+
+        //Scale to be same size
+        
+        m.lookAt(new BABYLON.Vector3(0, 1, 0))
+  }
   // Override local getter and setter 
 
   // Generate unique ID. 
@@ -54,9 +71,11 @@ class Space {
     //   var collectedObject = new CollectedObject(collectionsJSON[i].type, collectionsJSON[i].src);
     //   this._objectMap[collectedObject.uniqueID] = collectedObject;
     // }
-    var collectedObject = new CollectedObject("3D", "docs/assets/Atom01.glb")
-    this._objectMap[collectedObject.uniqueID] = collectedObject;
-
+    var fileNames = ["Atom01.glb", "Globe.glb", "Calculator.glb", "gallium.png", "Ship.glb"];
+    fileNames.forEach(fileName => {
+      var collectedObject = new CollectedObject("3D", "docs/assets/"+fileName)
+      this._objectMap[collectedObject.uniqueID] = collectedObject;  
+    });    
   }
 
   // TODO: override default getter and setter.
@@ -302,7 +321,7 @@ class Game {
       if (eventArg.key == ' ') {
         this.toggleZoomObjectMode();
       }
-      if ((eventArg.keyCode == 85 || eventArg.keyCode == 74) && this._gazeTarget) {
+      if ((eventArg.keyCode == 85 || eventArg.keyCode == 89) && this._gazeTarget) {
         var mesh: BABYLON.AbstractMesh = this._gazeTarget.mesh;
         while (mesh.parent != null) {
           var other: any = mesh.parent
@@ -330,6 +349,24 @@ class Game {
       if (eventArg.keyCode == 68) {  //right aka d
         this.rotationYState = 1;
       }
+      if(this._gazeTarget.mesh){
+        var o:CollectedObject = this._space._objectMap[this._gazeTarget.mesh.name]
+        console.log(this._gazeTarget.mesh.name)
+        if (eventArg.keyCode == 73) { //up aka w
+          o.setPosition(o.pos.x,o.pos.y+1)
+        }
+        if (eventArg.keyCode == 74) { //left aka a
+          o.setPosition(o.pos.x+1,o.pos.y)
+        }
+        if (eventArg.keyCode == 75) { //down aka s
+          o.setPosition(o.pos.x,o.pos.y-1)
+        }
+        if (eventArg.keyCode == 76) {  //right aka d
+          o.setPosition(o.pos.x-1,o.pos.y)
+        }
+      }
+      
+      
     });
     window.addEventListener('keyup', (eventArg) => {
 
@@ -363,14 +400,14 @@ class Game {
     skybox.isPickable = false;
 
     // create the ground (round platform)
-    var groundMaterial = new BABYLON.StandardMaterial("ground", this._scene);
-    groundMaterial.diffuseTexture = new BABYLON.Texture("textures/polar_grid.png", this._scene);
-    var ground = BABYLON.Mesh.CreateCylinder("ground", 0.1, 3, 3, 100, 10, this._scene);
-    // the user should see the ground below
-    ground.position = new BABYLON.Vector3(0, -1.5, 0);
-    ground.material = groundMaterial;
-    ground.isPickable = false;
-
+    this.load("assets/", "Stage03.glb").then((m) => {
+      // the user should see the ground below
+      m.position.y = -50;
+      m.scaling.x = 3;
+      m.scaling.z = 3;
+      m.isPickable = false;
+    });
+    
     this._gazeTarget = new SelectedObject();
 
     // TODO: replace the below with localStorage. 
@@ -386,7 +423,7 @@ class Game {
     //var index = 
     console.log(this._space._objectMap)
     for (var key in this._space._objectMap) {
-      var o = this._space._objectMap[key]
+      let o:CollectedObject = this._space._objectMap[key]
 
       console.log(o);
       var index = 0
@@ -411,23 +448,15 @@ class Game {
             bottom = Math.min(bottom, bottomY)
           }
         })
-        //TODO bottom is incorrect?
-        var startPos = new BABYLON.Vector3(0, 0, 0)
-
-        var rowSize = 3
-        var rowIndex = index % rowSize
-        var colIndex = Math.floor(index / rowSize)
-        var rot = -Math.PI / 2 + (Math.PI * (rowIndex / (rowSize - 1)))
-        m.position.x = startPos.x + (Math.sin(rot) * 5)//2*(i-objectCount/2)
-        m.position.z = startPos.z + (Math.cos(rot) * 5)
-        m.position.y = 1 + colIndex * 2
-
-        //Scale to be same size
         var desiredSize = 1
         m.scaling.x = desiredSize / size
         m.scaling.y = desiredSize / size
         m.scaling.z = desiredSize / size
-        m.lookAt(new BABYLON.Vector3(0, 1, 0))
+
+        var rowSize = 3
+        o.setPosition(index % rowSize,Math.floor(index / rowSize))
+        //TODO bottom is incorrect?
+        
         index++
       })
     }

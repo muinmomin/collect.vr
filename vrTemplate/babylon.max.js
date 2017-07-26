@@ -50380,7 +50380,7 @@ var BABYLON;
             var parentMeshName = this.id + " " + this.hand;
             var parentMesh = scene.getMeshByName(parentMeshName);
             if (parentMesh) {
-                if (!this._defaultModel && parentMesh.getChildren().length) {
+                if (!this._defaultModel) {
                     this._defaultModel = parentMesh;
                     if (meshLoaded) {
                         meshLoaded(this._defaultModel);
@@ -50395,59 +50395,59 @@ var BABYLON;
                    RootNode
                    Controller
                     HOME
-                    PRESSED
-                    UNPRESSED
-                    VALUE
-                        CrystalKey_6DOF_Home_Geo
+                        PRESSED
+                        UNPRESSED
+                        VALUE
+                            CrystalKey_6DOF_Home_Geo
                     MENU
-                    PRESSED
-                    UNPRESSED
-                    VALUE
+                        PRESSED
+                        UNPRESSED
+                        VALUE
                     GRASP
-                    PRESSED
-                    UNPRESSED
-                    VALUE
-                        CrystalKey_6DOF_Grip_Geo
+                        PRESSED
+                        UNPRESSED
+                        VALUE
+                            CrystalKey_6DOF_Grip_Geo
                     THUMBSTICK_PRESS
-                    PRESSED
-                    UNPRESSED
-                    VALUE
-                        THUMBSTICK_X
-                        MIN
-                        MAX
+                        PRESSED
+                        UNPRESSED
                         VALUE
-                        THUMBSTICK_Y
-                        MIN
-                        MAX
-                            VALUE
-                    SELECT
-                    PRESSED
-                    UNPRESSED
-                    VALUE
-                    CrystalKey_6DOF_Constellation
-                    CrystalKey_6DOF_Constellation_Flip
-                        CrystalKey_6DOF_Constellation_Rotate
-                    TOUCHPAD_PRESS
-                    PRESSED
-                    UNPRESSED
-                        VALUE
-                        TOUCHPAD_PRESS_X
-                        MIN
-                        MAX
-                        VALUE
-                        TOUCHPAD_PRESS_Y
-                            MIN
-                            MAX
-                            VALUE
-                            TOUCHPAD_TOUCH_X
-                            MIN
-                            MAX
-                            VALUE
-                            TOUCHPAD_TOUCH_Y
+                            THUMBSTICK_X
                                 MIN
                                 MAX
                                 VALUE
-                                TOUCH
+                                    THUMBSTICK_Y
+                                        MIN
+                                        MAX
+                                        VALUE
+                    SELECT
+                        PRESSED
+                        UNPRESSED
+                        VALUE
+                    CrystalKey_6DOF_Constellation
+                        CrystalKey_6DOF_Constellation_Flip
+                            CrystalKey_6DOF_Constellation_Rotate
+                    TOUCHPAD_PRESS
+                        PRESSED
+                        UNPRESSED
+                            VALUE
+                                TOUCHPAD_PRESS_X
+                                    VALUE
+                                        TOUCHPAD_PRESS_Y
+                                            VALUE
+                                                TOUCHPAD_TOUCH_X
+                                                    MIN
+                                                    MAX
+                                                    VALUE
+                                                        TOUCHPAD_TOUCH_Y
+                                                            MIN
+                                                            MAX
+                                                            VALUE
+                                                                TOUCH
+                                            MIN
+                                            MAX
+                                    MIN
+                                    MAX
                     CrystalKey_6DOF_Body_Geo
                     CrystalKey_6DOF_Pointing_Pose
                     CrystalKey_6DOF_LED_Tracking_CSYS
@@ -50458,6 +50458,8 @@ var BABYLON;
                         if (!mesh.parent) {
                             childMesh = childMesh || mesh;
                             childMesh.setParent(parentMesh);
+                            childMesh.position.copyFrom(BABYLON.Vector3.Zero());
+                            childMesh.rotationQuaternion.copyFrom(BABYLON.Quaternion.Zero());
                         }
                     });
                     _this._defaultModel = parentMesh;
@@ -50503,6 +50505,14 @@ var BABYLON;
             enumerable: true,
             configurable: true
         });
+        WindowsMixedRealityController.prototype.lerpButtonTransform = function (node, childName, value) {
+            var minMesh = node.getChildMeshes(true, function (n) { return n.name == 'MIN'; })[0];
+            var maxMesh = node.getChildMeshes(true, function (n) { return n.name == 'MAX'; })[0];
+            if (minMesh && maxMesh) {
+                var valueMesh = node.getChildMeshes(true, function (n) { return n.name == 'VALUE'; })[0] || node;
+                valueMesh.rotationQuaternion = BABYLON.Quaternion.Slerp(minMesh.rotationQuaternion, maxMesh.rotationQuaternion, value);
+            }
+        };
         /*
         // This is the old, broken mapping.
         0) trigger,
@@ -50518,9 +50528,7 @@ var BABYLON;
             switch (buttonIdx) {
                 case 0:
                     if (this._defaultModel) {
-                        (this._defaultModel.getChildren()[3]).rotation.x = -notifyObject.value * 0.20;
-                        (this._defaultModel.getChildren()[3]).position.y = -notifyObject.value * 0.005;
-                        (this._defaultModel.getChildren()[3]).position.z = -notifyObject.value * 0.005;
+                        this.lerpButtonTransform(this._defaultModel.getChildren()[0], 'SELECT', notifyObject.value);
                     }
                     this.onTriggerStateChangedObservable.notifyObservers(notifyObject);
                     return;
