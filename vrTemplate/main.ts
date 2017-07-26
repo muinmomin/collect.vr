@@ -201,13 +201,13 @@ class Game {
       foundHit = webVRcamera.controllers.some(controller => {
         let ray = controller.getForwardRay(length);
         ray.origin.addInPlace(ray.direction.scale(0.5));
-        return this.tryHit(ray);
+        return this.tryHit(ray) && !!(this.ray = ray);
       });
 
       if (!foundHit) {
         let cameraRay = webVRcamera.getForwardRay(length);
         cameraRay.direction.scaleInPlace(-1);
-        foundHit = this.tryHit(cameraRay);
+        foundHit = this.tryHit(cameraRay) && !!(this.ray = cameraRay);
       }
     
       // Update gaze lines
@@ -314,6 +314,25 @@ class Game {
     }, 'png');
   }
 
+  updateMovement() {
+    let webvrcamera = this._camera as BABYLON.WebVRFreeCamera;
+    if (webvrcamera) {
+      webvrcamera.controllers.some(c => {
+        let ctrl = c as BABYLON.WindowsMixedRealityController;
+        let x = ctrl.vrGamepad.axes[0];
+        let y = ctrl.vrGamepad.axes[1];
+
+        if (x > 0.1 || x < -0.1 || y > 0.1 || y < -0.1) {
+          // TODO: Olga - this X and Y can be used for your rotation. Values range from [-1, 1] for each variable.
+          // Corresponds to the thumbstick on the controller.
+          return true;
+        }
+          
+        return false;
+      });
+    }
+  }
+
   async createScene() {
     // create a basic BJS Scene object
     this._scene = new BABYLON.Scene(this._engine);
@@ -377,6 +396,7 @@ class Game {
 
     this.createCursor();
     this._scene.registerBeforeRender(() => { this.updateCursor(); });
+    this._scene.registerBeforeRender(() => { this.updateMovement(); });
 
     window.addEventListener('keydown', (eventArg) => {
       if (eventArg.key == '`')
