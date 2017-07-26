@@ -278,6 +278,9 @@ class Game {
       return;
     }
 
+    var hl = new BABYLON.HighlightLayer("hl1", selectedObject);
+	  hl.addMesh(selectedObject, BABYLON.Color3.White());
+
     // getObjectDetails(mesh.name);
     //console.debug("showMenuOptions for: " + selectedObject.mesh.name);
   }
