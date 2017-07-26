@@ -31,7 +31,6 @@
 
       // Captures data from right click and saves to local storage.
       browser.contextMenus.onClicked.addListener((info, tab) => {
-
             if (!localStorage) {
                   alert('Browser not supported!');
                   return;
@@ -45,6 +44,9 @@
             if (info.linkUrl !== undefined) {
                   obj['src'] = info.linkUrl;
                   obj['type'] = 'link';
+                  if (arr[arr.length - 1] === 'gltf') {
+                        obj['type'] = '3d';
+                  }
             }
             else if (info.srcUrl !== undefined) {
                   obj['src'] = info.srcUrl;
@@ -60,8 +62,6 @@
                   obj['src'] = info.selectionText;
                   obj['type'] = 'text';
             }
-
-            console.log(obj);
 
             var collections = localStorage.getItem(COLLECTION_KEY) ? localStorage.getItem(COLLECTION_KEY) : '[]';
             var oldCollections = JSON.parse(collections);
