@@ -241,7 +241,12 @@ class Game {
   }
 
   tryHit(ray:BABYLON.Ray) : boolean {
-    var hit = this._scene.pickWithRay(ray, null);
+    var hit = this._scene.pickWithRay(ray, function (mesh){
+      if(!mesh.isPickable){
+        return false;
+      }
+      return true;
+    });
     if (hit && hit.pickedMesh) {
       // selection cursor
       this._cursor.position = hit.pickedPoint;
