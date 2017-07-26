@@ -45,6 +45,11 @@ button
 {
     margin-left: -5px;
 }
+
+#view:hover {
+    cursor: pointer;
+}
+
 #launch-vr
 {
     padding-left:0;
