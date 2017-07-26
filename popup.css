@@ -16,13 +16,20 @@ button
     width: 300px;
 }
 
-#your-space
+#title-and-icons
+{
+    padding-bottom:10px;
+}
+
+#title
 {
     font-family: "Segoe UI Semibold";
     font-size:1.5em;
 }
 .bottom-buttons
 {
+    padding-top:15px;
+    padding-bottom:10px;
     background: none;
 }
 #delete
@@ -38,6 +45,11 @@ button
 {
     margin-left: -5px;
 }
+
+#view:hover {
+    cursor: pointer;
+}
+
 #launch-vr
 {
     padding-left:0;
@@ -46,8 +58,7 @@ button
 {
     display:none;
     background-color:lightgray;
-    padding-left: 10%;
-    padding-right:10%;
+    padding: 10%;
     text-align: center;
 }
 #screenshot{
@@ -69,11 +80,12 @@ button
 {
     height:100px;
     width:100px;
+    padding: 10px 0 10px 0;
     filter:opacity(20%);
 }
 #new-tab-icon
 {
-    padding-right: 5px;
+    padding-right: 10px;
     height:30px;
     width:30px;
     float:left;
@@ -81,7 +93,7 @@ button
 #web-vr-icon
 {
     padding-top:5px;
-    padding-right:5px;
+    padding-right:10px;
     height:20px;
     width:30px;
     float:left;

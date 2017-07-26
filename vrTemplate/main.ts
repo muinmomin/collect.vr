@@ -181,10 +181,10 @@ class Game {
   }
 
   createCursor() {
-    var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
-    cursorMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
+    var cursorMaterial = new BABYLON.PBRMetallicRoughnessMaterial("cursor", this._scene);
+    cursorMaterial.emissiveColor = new BABYLON.Color3(0.95, 0.95, 0.95);
 
-    this._cursor = BABYLON.Mesh.CreateSphere("cursor", 10, 0.3, this._scene);
+    this._cursor = BABYLON.Mesh.CreateSphere("cursor", 10, 0.1, this._scene);
     this._cursor.material = cursorMaterial;
     this._cursor.isPickable = false;
   }
@@ -241,7 +241,12 @@ class Game {
   }
 
   tryHit(ray:BABYLON.Ray) : boolean {
-    var hit = this._scene.pickWithRay(ray, null);
+    var hit = this._scene.pickWithRay(ray, function (mesh){
+      if(!mesh.isPickable){
+        return false;
+      }
+      return true;
+    });
     if (hit && hit.pickedMesh) {
       // selection cursor
       this._cursor.position = hit.pickedPoint;
@@ -277,6 +282,9 @@ class Game {
       //console.error("Can't hightlight mesh: " + selectedObject);
       return;
     }
+
+    var hl = new BABYLON.HighlightLayer("hl1", selectedObject);
+	  hl.addMesh(selectedObject, BABYLON.Color3.White());
 
     // getObjectDetails(mesh.name);
     //console.debug("showMenuOptions for: " + selectedObject.mesh.name);
