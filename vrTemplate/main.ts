@@ -197,7 +197,7 @@ class Game {
     
     let webVRcamera = this._camera as BABYLON.WebVRFreeCamera;
     let foundHit:boolean = false;
-    if (webVRcamera) {
+    if (webVRcamera && webVRcamera.controllers) {
       foundHit = webVRcamera.controllers.some(controller => {
         let ray = controller.getForwardRay(length);
         ray.origin.addInPlace(ray.direction.scale(0.5));
@@ -316,7 +316,7 @@ class Game {
 
   updateMovement() {
     let webvrcamera = this._camera as BABYLON.WebVRFreeCamera;
-    if (webvrcamera) {
+    if (webvrcamera && webvrcamera.controllers) {
       webvrcamera.controllers.some(c => {
         let ctrl = c as BABYLON.WindowsMixedRealityController;
         let x = ctrl.vrGamepad.axes[0];
