@@ -62,20 +62,22 @@ class Space {
 
   // TODO: constructor with localstorage
   constructor() {
-    // var collectionsStr = localStorage.getItem(this.COLLECTION_KEY);
-    // var collectionsJSON = JSON.parse(collectionsStr);
+    var collectionsStr = localStorage.getItem(this.COLLECTION_KEY);
+    var collectionsJSON = JSON.parse(collectionsStr);
+    if(collectionsJSON){
+      this._length = collectionsJSON.length;
 
-    // this._length = collectionsJSON.length;
-
-    // for (var i = 0; i < collectionsJSON.length; ++i) {
-    //   var collectedObject = new CollectedObject(collectionsJSON[i].type, collectionsJSON[i].src);
-    //   this._objectMap[collectedObject.uniqueID] = collectedObject;
-    // }
-    var fileNames = ["Atom01.glb", "Globe.glb", "Calculator.glb", "gallium.png", "Ship.glb"];
-    fileNames.forEach(fileName => {
-      var collectedObject = new CollectedObject("3D", "docs/assets/"+fileName)
-      this._objectMap[collectedObject.uniqueID] = collectedObject;  
-    });    
+      for (var i = 0; i < collectionsJSON.length; ++i) {
+        var collectedObject = new CollectedObject(collectionsJSON[i].type, collectionsJSON[i].src);
+        this._objectMap[collectedObject.uniqueID] = collectedObject;
+      }
+    }
+    
+    // var fileNames = ["Atom01.glb", "Globe.glb", "Calculator.glb", "gallium.png", "Ship.glb"];
+    // fileNames.forEach(fileName => {
+    //   var collectedObject = new CollectedObject("3D", "http://muin.me/collect.vr/assets/Molecule.glb")
+    //   this._objectMap[collectedObject.uniqueID] = collectedObject;  
+    // });    
   }
 
   // TODO: override default getter and setter.
@@ -553,7 +555,7 @@ var hl = new BABYLON.HighlightLayer("hl1", selectedObject);
       console.log(o);
       var index = 0
       //this._space._objectMap[o.uniqueID] = o
-      this.load("/", o.src).then((m) => {
+      this.load("", o.src).then((m) => {
         console.log(o.src);
         console.log("loaded")
         o.mesh = m
