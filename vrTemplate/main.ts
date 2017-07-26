@@ -29,7 +29,7 @@ class CollectedObject {
         var rot = (-Math.PI / 4) + ((Math.PI/2) * (rowIndex / (rowSize - 1)))
         m.position.x = startPos.x + (Math.sin(rot) * 5)//2*(i-objectCount/2)
         m.position.z = startPos.z + (Math.cos(rot) * 5)
-        m.position.y = 0.2 + colIndex * 2
+        m.position.y = -1 + colIndex * 2
 
         //Scale to be same size
         
@@ -399,12 +399,18 @@ class Game {
     skybox.material = skyboxMaterial;
     skybox.isPickable = false;
 
+    var wire = BABYLON.Mesh.CreateSphere("wireframeBackground", 4, 60, this._scene);
+    wire.material = new BABYLON.StandardMaterial("wireframeBackground", this._scene);
+    wire.material.wireframe = true;
+    wire.material.alpha = 0.1;
+
     // create the ground (round platform)
     this.load("assets/", "Stage03.glb").then((m) => {
       // the user should see the ground below
-      m.position.y = -50;
-      m.scaling.x = 3;
-      m.scaling.z = 3;
+      m.position.y = -2;
+       m.scaling.y = 0.1;
+      m.scaling.x = 0.1;
+      m.scaling.z = 0.1;
       m.isPickable = false;
     });
     
