@@ -55,6 +55,12 @@ class Space {
       this._objectMap[collectedObject.uniqueID] = collectedObject;
     }
 
+    // // Test code with local file 
+    // var localObject = new CollectedObject('2d', 'ms-browser-extension://collectvr_3997AFE8C86E45348ED51A5413E845F6/vrTemplate/Textures/polar_grid.png');
+    // this._objectMap[collectedObject.uniqueID] = localObject;
+    // console.log('add local object');
+    // console.log(localObject.src);
+
   }
 
   // TODO: override default getter and setter.
