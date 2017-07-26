@@ -50527,26 +50527,26 @@ var BABYLON;
             console.log('Button Change: ' + buttonIdx);
             switch (buttonIdx) {
                 case 0:
-                    if (this._defaultModel) {
-                        this.lerpButtonTransform(this._defaultModel.getChildren()[0], 'SELECT', notifyObject.value);
-                    }
+                    //if (this._defaultModel) {
+                    //    this.lerpButtonTransform(<AbstractMesh>this._defaultModel.getChildren()[0], 'SELECT', notifyObject.value);
+                    //}
                     this.onTriggerStateChangedObservable.notifyObservers(notifyObject);
                     return;
                 case 1:
-                    if (this._defaultModel) {
-                        if (notifyObject.pressed) {
-                            (this._defaultModel.getChildren()[1]).position.y = -0.001;
-                        }
-                        else {
-                            (this._defaultModel.getChildren()[1]).position.y = 0;
-                        }
-                    }
+                    //if (this._defaultModel) {
+                    //    if (notifyObject.pressed) {
+                    //        (<AbstractMesh>(this._defaultModel.getChildren()[1])).position.y = -0.001;
+                    //    }
+                    //    else {
+                    //        (<AbstractMesh>(this._defaultModel.getChildren()[1])).position.y = 0;
+                    //    }
+                    //}
                     this.onMainButtonStateChangedObservable.notifyObservers(notifyObject);
                     return;
                 case 2:
-                    if (this._defaultModel) {
-                        (this._defaultModel.getChildren()[4]).position.x = triggerDirection * notifyObject.value * 0.0035;
-                    }
+                    //if (this._defaultModel) {
+                    //    (<AbstractMesh>(this._defaultModel.getChildren()[4])).position.x = triggerDirection * notifyObject.value * 0.0035;
+                    //}
                     this.onSecondaryTriggerStateChangedObservable.notifyObservers(notifyObject);
                     return;
                 case 3:

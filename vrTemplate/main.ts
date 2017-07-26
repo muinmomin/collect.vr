@@ -265,21 +265,21 @@ class Game {
 
   removeObjectHighlight(selectedObject) {
     if (!selectedObject.mesh || !selectedObject.mesh.name) {
-      console.error("Can't hightlight mesh: " + selectedObject);
+      //console.error("Can't hightlight mesh: " + selectedObject);
       return;
     }
 
-    console.debug("hideMenuOptions for: " + selectedObject.mesh.name);
+    //console.debug("hideMenuOptions for: " + selectedObject.mesh.name);
   }
 
   addObjectHighlight(selectedObject) {
     if (!selectedObject.mesh || !selectedObject.mesh.name) {
-      console.error("Can't hightlight mesh: " + selectedObject);
+      //console.error("Can't hightlight mesh: " + selectedObject);
       return;
     }
 
     // getObjectDetails(mesh.name);
-    console.debug("showMenuOptions for: " + selectedObject.mesh.name);
+    //console.debug("showMenuOptions for: " + selectedObject.mesh.name);
   }
 
   toggleZoomObjectMode() {
@@ -333,8 +333,42 @@ class Game {
 
     if (headset) {
       // Create a WebVR camera with the trackPosition property set to false so that we can control movement with the gamepad
-      this._camera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, 0), this._scene, { trackPosition: true });
-
+      let webvrcamera = new BABYLON.WebVRFreeCamera("vrcamera", new BABYLON.Vector3(0, 0, 0), this._scene, { trackPosition: true });
+      this._camera = webvrcamera;
+      
+      // Listen to controller button event
+      webvrcamera.onControllersAttached = (controllers) => {
+        controllers.forEach(controller => {
+          let ctrl = controller as BABYLON.WindowsMixedRealityController 
+          // trigger
+          if (!ctrl.onTriggerButtonStateChangedObservable.hasObservers())
+            ctrl.onTriggerStateChangedObservable.add((button, state) => {
+              if (!button.pressed) {
+                console.log('released trigger');
+                this.toggleZoomObjectMode();
+              }
+            });
+          // Grip
+          if (!ctrl.onGripButtonStateChangedObservable.hasObservers())
+            ctrl.onGripButtonStateChangedObservable.add((button, state) => {
+              if (!button.pressed) {
+                console.log('released grip');
+              } else {
+                console.log('pressed grip');
+              }
+            });
+          // Menu
+          if (!ctrl.onMenuButtonStateChangedObservable.hasObservers())
+            ctrl.onMenuButtonStateChangedObservable.add((button, state) => {
+              if (!button.pressed) {
+                console.log('released menu');
+              } else {
+                console.log('pressed menu');
+              }
+            });
+        });
+      };
+      
       //this._camera.deviceScaleFactor = 1;
     } else {
       // create a FreeCamera, and set its position to (x:0, y:0, z:-10)
