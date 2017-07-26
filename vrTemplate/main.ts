@@ -363,14 +363,12 @@ class Game {
     skybox.isPickable = false;
 
     // create the ground (round platform)
-    var groundMaterial = new BABYLON.StandardMaterial("ground", this._scene);
-    groundMaterial.diffuseTexture = new BABYLON.Texture("textures/polar_grid.png", this._scene);
-    var ground = BABYLON.Mesh.CreateCylinder("ground", 0.1, 3, 3, 100, 10, this._scene);
-    // the user should see the ground below
-    ground.position = new BABYLON.Vector3(0, -1.5, 0);
-    ground.material = groundMaterial;
-    ground.isPickable = false;
-
+    this.load("assets/", "Stage03.glb").then((m) => {
+      // the user should see the ground below
+      m.position.y = -50;
+      m.isPickable = false;
+    });
+    
     this._gazeTarget = new SelectedObject();
 
     // TODO: replace the below with localStorage. 
