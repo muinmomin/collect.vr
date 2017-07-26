@@ -214,7 +214,6 @@ class Game {
       this.gazeMesh['gazeleft'].updateMeshPositions((p) => {p[0]=0;p[1]=0,p[2]=0,p[3]=0,p[4]=0,p[5]=0}, false);
       this.gazeMesh['gazeright'].updateMeshPositions((p) => {p[0]=0;p[1]=0,p[2]=0,p[3]=0,p[4]=0,p[5]=0}, false);
       webVRcamera.controllers.forEach(controller => {
-        console.log (controller.mesh)
         let mesh:BABYLON.LinesMesh = this.gazeMesh['gaze'+controller.hand];
         if (mesh) {
           let ray = controller.getForwardRay(length)
