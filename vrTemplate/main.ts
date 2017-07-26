@@ -90,11 +90,11 @@ class Game {
   private _camera: BABYLON.FreeCamera;
   private _light: BABYLON.Light;
   private _cursor: BABYLON.Mesh;
-  private _gazeTarget: SelectedObject;
-  private objectJump = .8;
-  private rotationXState = 0;
-  private rotationYState = 0;
-  private ray: BABYLON.Ray;
+  private _gazeTarget: SelectedObject;  //this is the mesh within the current gaze. undefined if no object
+  private objectJump = .8;  //distance in meters for controls u/j to move the gazeTarget
+  private rotationXState = 0; //1=up, 0=nothing, -1=down
+  private rotationYState = 0; //1=right, 0=nothing, -1=left
+  private ray: BABYLON.Ray; //the gaze's raycast
   private _space:Space;
   private gazeMesh: any
   //private _objectMap:Map<string, CollectedObject> = new Map<string, CollectedObject>()
@@ -410,22 +410,27 @@ class Game {
       if (eventArg.key == ' ') {
         this.toggleZoomObjectMode();
       }
-      if ((eventArg.keyCode == 85 || eventArg.keyCode == 89) && this._gazeTarget) {
+      if ((eventArg.keyCode == 85 || eventArg.keyCode == 89) && this._gazeTarget) { //85=u=up, 89=y=down
         var mesh: BABYLON.AbstractMesh = this._gazeTarget.mesh;
         while (mesh.parent != null) {
           var other: any = mesh.parent
           mesh = other
         }
+        //cloning to maintain the same direction. Normalize makes the length of vector 1.00
         var v = this.ray.direction.clone().normalize()//.multiplyByFloats(0.8,)
 
         if ((eventArg.keyCode == 85)) {
-          //v.z*=-1;
+          //move opposite direction by inversing the vector
           v = v.multiplyByFloats(-1, -1, -1);
         }
 
         mesh.position.addInPlace(v)
       }
-
+//the following 4 if statements update the rotation state global variables,
+//if a user holds down w, a, s, or d the rotation state will be updated so
+//the object will rotate, until the "keyup" event occurs
+// the keyCode are the ASCII values of the letters. for some reason we must use
+//the uppercase values, the lowercase one's don't work in the VR thus far
       if (eventArg.keyCode == 87) { //up aka w
         this.rotationXState = 1;
       }
@@ -438,19 +443,19 @@ class Game {
       if (eventArg.keyCode == 68) {  //right aka d
         this.rotationYState = 1;
       }
-      if(this._gazeTarget.mesh){
+      if(this._gazeTarget.mesh){ //if there is a mesh in the gaze target
         var o:CollectedObject = this._space._objectMap[this._gazeTarget.mesh.name]
         console.log(this._gazeTarget.mesh.name)
-        if (eventArg.keyCode == 73) { //up aka w
+        if (eventArg.keyCode == 73) { //i
           o.setPosition(o.pos.x,o.pos.y+1)
         }
-        if (eventArg.keyCode == 74) { //left aka a
+        if (eventArg.keyCode == 74) { //j
           o.setPosition(o.pos.x+1,o.pos.y)
         }
-        if (eventArg.keyCode == 75) { //down aka s
+        if (eventArg.keyCode == 75) { //k
           o.setPosition(o.pos.x,o.pos.y-1)
         }
-        if (eventArg.keyCode == 76) {  //right aka d
+        if (eventArg.keyCode == 76) {  //l
           o.setPosition(o.pos.x-1,o.pos.y)
         }
       }
@@ -458,7 +463,7 @@ class Game {
       
     });
     window.addEventListener('keyup', (eventArg) => {
-
+      //updates the global rotation state variables when the rotational command keys are released
       if (eventArg.keyCode == 87 || eventArg.keyCode == 83) { //up or down
         this.rotationXState = 0;
       }
@@ -578,6 +583,17 @@ class Game {
   animate(): void {
     // run the render loop
     this._engine.runRenderLoop(() => {
+
+      /**
+       * this will run if there is a mesh in the gazeTarget and at least one of the rotation states
+       * are not 0 (so a user is holding down a rotation key)
+       * forward=the forward ray, we did a double cross product to get the normal vector "up"
+       * to get the x axis of the current gaze, we crossed the forward and up vectors
+       * each render loop the rotation is .105 meters, this can be changed just a generic way of doing it
+       * rotate: give parameters of axis to rotate around, radians to move, and the space to move in
+       * 
+       * future work: creating a center point within the bounding box of the mesh for the mesh to rotate around
+       */
       if (this._gazeTarget.mesh && (this.rotationXState != 0 || this.rotationYState != 0)) {
         var forward = this.ray.direction;
         let up = BABYLON.Vector3.Cross(BABYLON.Vector3.Cross(new BABYLON.Vector3(0, 1, 0), forward), forward)
