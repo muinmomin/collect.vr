@@ -67,7 +67,7 @@
             ctx.fillRect(0, 0, canv.width, canv.height);
 
             //Puts text on canvas element
-            ctx.font = "15px Segoe UI Semibold";
+            ctx.font = "25px Segoe UI Semibold";
             var mwidth = canv.width - 50;
             var y = 35;
             var x = (canv.width - mwidth) / 2;
@@ -116,7 +116,7 @@
             var collections = localStorage.getItem(COLLECTION_KEY) ? localStorage.getItem(COLLECTION_KEY) : '[]';
             var oldCollections = JSON.parse(collections);
             oldCollections.push(obj);
-            localStorage.setItem(COLLECTION_KEY, JnSON.stringify(oldCollections));
+            localStorage.setItem(COLLECTION_KEY, JSON.stringify(oldCollections));
       });
 
 })();
