@@ -323,9 +323,14 @@ class Game {
         let y = ctrl.vrGamepad.axes[1];
 
         if (x > 0.1 || x < -0.1 || y > 0.1 || y < -0.1) {
-          // TODO: Olga - this X and Y can be used for your rotation. Values range from [-1, 1] for each variable.
+          // X and Y can be used for your rotation. Values range from [-1, 1] for each variable.
           // Corresponds to the thumbstick on the controller.
+          this.rotationXState = y;
+          this.rotationYState = x;
           return true;
+        } else { 
+          this.rotationXState = 0;
+          this.rotationYState = 0;
         }
           
         return false;
