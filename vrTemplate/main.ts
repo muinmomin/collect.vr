@@ -181,10 +181,10 @@ class Game {
   }
 
   createCursor() {
-    var cursorMaterial = new BABYLON.StandardMaterial("cursor", this._scene);
-    cursorMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
+    var cursorMaterial = new BABYLON.PBRMetallicRoughnessMaterial("cursor", this._scene);
+    cursorMaterial.emissiveColor = new BABYLON.Color3(0.95, 0.95, 0.95);
 
-    this._cursor = BABYLON.Mesh.CreateSphere("cursor", 10, 0.3, this._scene);
+    this._cursor = BABYLON.Mesh.CreateSphere("cursor", 10, 0.1, this._scene);
     this._cursor.material = cursorMaterial;
     this._cursor.isPickable = false;
   }
