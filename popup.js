@@ -7,4 +7,10 @@ window.onload = function(){
   } else {
     
   }
+
+  document.getElementById('view').addEventListener('click', function(){
+      var creating = browser.tabs.create({
+                  url: 'vrTemplate/index.html'
+      });
+  });
 }
