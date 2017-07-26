@@ -282,9 +282,13 @@ class Game {
       //console.error("Can't hightlight mesh: " + selectedObject);
       return;
     }
-
-    var hl = new BABYLON.HighlightLayer("hl1", selectedObject);
+try{
+var hl = new BABYLON.HighlightLayer("hl1", selectedObject);
 	  hl.addMesh(selectedObject, BABYLON.Color3.White());
+}catch(e){
+
+}
+    
 
     // getObjectDetails(mesh.name);
     //console.debug("showMenuOptions for: " + selectedObject.mesh.name);
