@@ -54,9 +54,11 @@ class Space {
     //   var collectedObject = new CollectedObject(collectionsJSON[i].type, collectionsJSON[i].src);
     //   this._objectMap[collectedObject.uniqueID] = collectedObject;
     // }
-    var collectedObject = new CollectedObject("3D", "docs/assets/Atom01.glb")
-    this._objectMap[collectedObject.uniqueID] = collectedObject;
-
+    var fileNames = ["Atom01.glb", "Globe.glb", "Calculator.glb", "gallium.png"];
+    fileNames.forEach(fileName => {
+      var collectedObject = new CollectedObject("3D", "docs/assets/"+fileName)
+      this._objectMap[collectedObject.uniqueID] = collectedObject;  
+    });    
   }
 
   // TODO: override default getter and setter.
@@ -366,6 +368,8 @@ class Game {
     this.load("assets/", "Stage03.glb").then((m) => {
       // the user should see the ground below
       m.position.y = -50;
+      m.scaling.x = 3;
+      m.scaling.z = 3;
       m.isPickable = false;
     });
     
