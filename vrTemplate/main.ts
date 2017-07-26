@@ -23,13 +23,13 @@ class CollectedObject {
       this.pos.y = colIndex
         var startPos = new BABYLON.Vector3(0, 0, 0)
 
-        var rowSize = 3
+        var rowSize = 4
         var m = this.mesh        
         
         var rot = (-Math.PI / 4) + ((Math.PI/2) * (rowIndex / (rowSize - 1)))
         m.position.x = startPos.x + (Math.sin(rot) * 5)//2*(i-objectCount/2)
         m.position.z = startPos.z + (Math.cos(rot) * 5)
-        m.position.y = 1 + colIndex * 2
+        m.position.y = 0.2 + colIndex * 2
 
         //Scale to be same size
         
@@ -453,7 +453,7 @@ class Game {
         m.scaling.y = desiredSize / size
         m.scaling.z = desiredSize / size
 
-        var rowSize = 3
+        var rowSize = 4
         o.setPosition(index % rowSize,Math.floor(index / rowSize))
         //TODO bottom is incorrect?
         
