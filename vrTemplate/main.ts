@@ -71,6 +71,12 @@ class Space {
         var collectedObject = new CollectedObject(collectionsJSON[i].type, collectionsJSON[i].src);
         this._objectMap[collectedObject.uniqueID] = collectedObject;
       }
+    }else{
+      var fileNames = ["Atom01.glb", "Globe.glb", "Calculator.glb", "gallium.png", "Ship.glb"];
+      fileNames.forEach(fileName => {
+        var collectedObject = new CollectedObject("3D", "docs/assets/"+fileName)
+        this._objectMap[collectedObject.uniqueID] = collectedObject;  
+      });   
     }
     
     // var fileNames = ["Atom01.glb", "Globe.glb", "Calculator.glb", "gallium.png", "Ship.glb"];
@@ -555,7 +561,11 @@ var hl = new BABYLON.HighlightLayer("hl1", selectedObject);
       console.log(o);
       var index = 0
       //this._space._objectMap[o.uniqueID] = o
-      this.load("", o.src).then((m) => {
+      var root = "/"
+      if(o.src[0]=="h"){
+        root = ""
+      }
+      this.load(root, o.src).then((m) => {
         console.log(o.src);
         console.log("loaded")
         o.mesh = m
