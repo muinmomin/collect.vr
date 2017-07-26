@@ -211,6 +211,7 @@ class Game {
       }
     
       // Update gaze lines
+      
       this.gazeMesh['gazeleft'].updateMeshPositions((p) => {p[0]=0;p[1]=0,p[2]=0,p[3]=0,p[4]=0,p[5]=0}, false);
       this.gazeMesh['gazeright'].updateMeshPositions((p) => {p[0]=0;p[1]=0,p[2]=0,p[3]=0,p[4]=0,p[5]=0}, false);
       webVRcamera.controllers.forEach(controller => {
@@ -227,6 +228,13 @@ class Game {
         }
       });
     }
+    else{ //when there is no controller so using computer instead
+      var forward=new BABYLON.Vector3(0,0,-1);
+      forward=vecToLocal(forward, this._camera);  //combining vector forward with camera's point of view
+      var origin=this._camera.globalPosition; //getting camera's position
+      this.ray=new BABYLON.Ray(origin, forward, length);
+      return this.tryHit(this.ray);
+    }
 
     if (!foundHit) {
       // draw cursor no selection
@@ -242,10 +250,7 @@ class Game {
 
   tryHit(ray:BABYLON.Ray) : boolean {
     var hit = this._scene.pickWithRay(ray, function (mesh){
-      if(!mesh.isPickable){
-        return false;
-      }
-      return true;
+      return mesh.isPickable;
     });
     if (hit && hit.pickedMesh) {
       // selection cursor
