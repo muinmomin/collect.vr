@@ -175,20 +175,26 @@ class Game {
 
     var vrPoseOrientation:BABYLON.Quaternion;
     if (this._webVrCamera) {
-      vrPoseOrientation = new BABYLON.Quaternion(
+      /*vrPoseOrientation = new BABYLON.Quaternion(
             this._webVrCamera.rawPose.orientation[1],
-            this._webVrCamera.rawPose.orientation[0],
             this._webVrCamera.rawPose.orientation[2],
-            this._webVrCamera.rawPose.orientation[3]
-          );
+            this._webVrCamera.rawPose.orientation[3],
+            this._webVrCamera.rawPose.orientation[0]
+          );*/
+
+      vrPoseOrientation = BABYLON.Quaternion.FromArray(
+        this._webVrCamera.rawPose.orientation);
     }
 
     var forward = new BABYLON.Vector3(0, 0, -1);
     forward = vecToLocal(forward, this._camera);
     if (this._webVrCamera) {
-      var rotMx:BABYLON.Matrix;
+      var rotMx = new BABYLON.Matrix();
+      
+      //vrPoseOrientation = BABYLON.Quaternion.Inverse(vrPoseOrientation);
       vrPoseOrientation.toRotationMatrix(rotMx);
       forward = BABYLON.Vector3.TransformCoordinates(forward, rotMx);
+      //forward.y = -forward.y;
     }
 
     var origin = this._camera.position;
