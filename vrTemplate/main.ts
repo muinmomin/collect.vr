@@ -233,7 +233,7 @@ class Game {
       forward=vecToLocal(forward, this._camera);  //combining vector forward with camera's point of view
       var origin=this._camera.globalPosition; //getting camera's position
       this.ray=new BABYLON.Ray(origin, forward, length);
-      return this.tryHit(this.ray);
+      foundHit= this.tryHit(this.ray);
     }
 
     if (!foundHit) {
@@ -515,11 +515,13 @@ var hl = new BABYLON.HighlightLayer("hl1", selectedObject);
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     skybox.material = skyboxMaterial;
     skybox.isPickable = false;
+    
 
     var wire = BABYLON.Mesh.CreateSphere("wireframeBackground", 4, 60, this._scene);
     wire.material = new BABYLON.StandardMaterial("wireframeBackground", this._scene);
     wire.material.wireframe = true;
     wire.material.alpha = 0.1;
+    wire.isPickable=false;
 
     // create the ground (round platform)
     this.load("assets/", "Stage03.glb").then((m) => {
