@@ -23,13 +23,13 @@ class CollectedObject {
       this.pos.y = colIndex
         var startPos = new BABYLON.Vector3(0, 0, 0)
 
-        var rowSize = 3
+        var rowSize = 4
         var m = this.mesh        
         
         var rot = (-Math.PI / 4) + ((Math.PI/2) * (rowIndex / (rowSize - 1)))
         m.position.x = startPos.x + (Math.sin(rot) * 5)//2*(i-objectCount/2)
         m.position.z = startPos.z + (Math.cos(rot) * 5)
-        m.position.y = 1 + colIndex * 2
+        m.position.y = -1 + colIndex * 2
 
         //Scale to be same size
         
@@ -422,7 +422,13 @@ class Game {
     // create the skybox cubemap
     var skybox = BABYLON.Mesh.CreateBox("skyBox", 10000, this._scene);
     var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this._scene);
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("Textures/grad1/grad1", this._scene);
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("Textures/sb1/", this._scene, [
+      "CloudyCrown_Midday_Back.png", 
+      "CloudyCrown_Midday_Up.png", 
+      "CloudyCrown_Midday_Left.png",
+      "CloudyCrown_Midday_Front.png", 
+      "CloudyCrown_Midday_Down.png",
+      "CloudyCrown_Midday_Right.png",]);
     skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
     skyboxMaterial.backFaceCulling = false;
     skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
@@ -430,12 +436,18 @@ class Game {
     skybox.material = skyboxMaterial;
     skybox.isPickable = false;
 
+    var wire = BABYLON.Mesh.CreateSphere("wireframeBackground", 4, 60, this._scene);
+    wire.material = new BABYLON.StandardMaterial("wireframeBackground", this._scene);
+    wire.material.wireframe = true;
+    wire.material.alpha = 0.1;
+
     // create the ground (round platform)
     this.load("assets/", "Stage03.glb").then((m) => {
       // the user should see the ground below
-      m.position.y = -50;
-      m.scaling.x = 3;
-      m.scaling.z = 3;
+      m.position.y = -2;
+       m.scaling.y = 0.1;
+      m.scaling.x = 0.1;
+      m.scaling.z = 0.1;
       m.isPickable = false;
     });
     
@@ -484,7 +496,7 @@ class Game {
         m.scaling.y = desiredSize / size
         m.scaling.z = desiredSize / size
 
-        var rowSize = 3
+        var rowSize = 4
         o.setPosition(index % rowSize,Math.floor(index / rowSize))
         //TODO bottom is incorrect?
         
