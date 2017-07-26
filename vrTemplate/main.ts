@@ -349,20 +349,23 @@ class Game {
       if (eventArg.keyCode == 68) {  //right aka d
         this.rotationYState = 1;
       }
-      var o:CollectedObject = this._space._objectMap[this._gazeTarget.mesh.name]
-      console.log(this._gazeTarget.mesh.name)
-      if (eventArg.keyCode == 73) { //up aka w
-        o.setPosition(o.pos.x,o.pos.y+1)
+      if(this._gazeTarget.mesh){
+        var o:CollectedObject = this._space._objectMap[this._gazeTarget.mesh.name]
+        console.log(this._gazeTarget.mesh.name)
+        if (eventArg.keyCode == 73) { //up aka w
+          o.setPosition(o.pos.x,o.pos.y+1)
+        }
+        if (eventArg.keyCode == 74) { //left aka a
+          o.setPosition(o.pos.x+1,o.pos.y)
+        }
+        if (eventArg.keyCode == 75) { //down aka s
+          o.setPosition(o.pos.x,o.pos.y-1)
+        }
+        if (eventArg.keyCode == 76) {  //right aka d
+          o.setPosition(o.pos.x-1,o.pos.y)
+        }
       }
-      if (eventArg.keyCode == 74) { //left aka a
-        o.setPosition(o.pos.x+1,o.pos.y)
-      }
-      if (eventArg.keyCode == 75) { //down aka s
-        o.setPosition(o.pos.x,o.pos.y-1)
-      }
-      if (eventArg.keyCode == 76) {  //right aka d
-        o.setPosition(o.pos.x-1,o.pos.y)
-      }
+      
       
     });
     window.addEventListener('keyup', (eventArg) => {
