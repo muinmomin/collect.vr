@@ -140,24 +140,48 @@ class Game {
   // loadImage assumes the file format is .png
   async loadImage(root, name): Promise<BABYLON.Mesh> {
     var p: Promise<BABYLON.Mesh> = new Promise((res, rej) => {
-      var filename = name.slice(0, -4);
-      var planeName = filename + 'Plane';
-      var srcPath = '' + name;
-      const size = 1.0;  /* Scaling factor for the image is called size. */
-      var imageMaterial = new BABYLON.StandardMaterial(filename, this._scene);
-      var image = BABYLON.Mesh.CreatePlane(planeName, size, this._scene, false, BABYLON.Mesh.DEFAULTSIDE);
+      var srcURL = root + name; 
+      this.loadBlobURL(srcURL).then(function (blobURL) {
+        var filename = blobURL.slice(0, -4);
+        var planeName = filename + 'Plane';
+        var srcPath = '' + srcURL;
+        const size = 1.0;  /* Scaling factor for the image is called size. */
+        var imageMaterial = new BABYLON.StandardMaterial(filename, this._scene);
+        var image = BABYLON.Mesh.CreatePlane(planeName, size, this._scene, false, BABYLON.Mesh.DEFAULTSIDE);
 
-      imageMaterial.diffuseTexture = new BABYLON.Texture(srcPath, this._scene);
-      // image.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
-      image.material = imageMaterial;
-      var m = new BABYLON.Mesh("", this._scene)
-      m.addChild(image)
-      res(m)
+        imageMaterial.diffuseTexture = new BABYLON.Texture(srcPath, this._scene);
+        // image.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
+        image.material = imageMaterial;
+        var m = new BABYLON.Mesh("", this._scene)
+        m.addChild(image)
+        res(m)
+
+      })
 
     });
 
     return p;
 
+  }
+
+  // loadBlobURL sends a http request to a remote image. Upon receiving the response, 
+  // it creates a local random URL representing the image. Note: this assumes the image is png format.
+  // Test image: http://fix-webauthn-demo.azurewebsites.net/webauthn/images/hello.png
+  async loadBlobURL(url): Promise<String> {
+    var p:Promise<String> = new Promise((res, rej) => {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'blob';
+      xhr.onload = function(e) {
+        if (xhr.status == 200) {
+          var blob = xhr.response;
+          var imageURL = URL.createObjectURL(blob);
+          res(imageURL);
+        }
+      }
+      xhr.send();
+    })
+    return p;
   }
 
   show3d() {
