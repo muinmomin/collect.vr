@@ -96,6 +96,7 @@ class Game {
   private rotationYState = 0;
   private ray: BABYLON.Ray;
   private _space:Space;
+  private gazeMesh: any
   //private _objectMap:Map<string, CollectedObject> = new Map<string, CollectedObject>()
 
   constructor(canvasElement: string, show3dButtonElement: string) {
@@ -191,21 +192,44 @@ class Game {
   updateCursor() {
     if (!this._cursor)
       return;
-
-    var forward = new BABYLON.Vector3(0, 0, -1);
-    forward = vecToLocal(forward, this._camera);
-    var origin = this._camera.globalPosition;
-
-    var direction = forward.subtract(origin);
-    direction = BABYLON.Vector3.Normalize(direction);
-
+    
     var length = 30;
+    
+    let webVRcamera = this._camera as BABYLON.WebVRFreeCamera;
+    let foundHit:boolean = false;
+    if (webVRcamera) {
+      foundHit = webVRcamera.controllers.some(controller => {
+        let ray = controller.getForwardRay(length);
+        ray.origin.addInPlace(ray.direction.scale(0.5));
+        return this.tryHit(ray);
+      });
 
-    this.ray = new BABYLON.Ray(origin, direction, length);
-    var ray = this.ray
-    var hit = this._scene.pickWithRay(ray, null);
+      if (!foundHit) {
+        let cameraRay = webVRcamera.getForwardRay(length);
+        cameraRay.direction.scaleInPlace(-1);
+        foundHit = this.tryHit(cameraRay);
+      }
+    
+      // Update gaze lines
+      this.gazeMesh['gazeleft'].updateMeshPositions((p) => {p[0]=0;p[1]=0,p[2]=0,p[3]=0,p[4]=0,p[5]=0}, false);
+      this.gazeMesh['gazeright'].updateMeshPositions((p) => {p[0]=0;p[1]=0,p[2]=0,p[3]=0,p[4]=0,p[5]=0}, false);
+      webVRcamera.controllers.forEach(controller => {
+        console.log (controller.mesh)
+        let mesh:BABYLON.LinesMesh = this.gazeMesh['gaze'+controller.hand];
+        if (mesh) {
+          let ray = controller.getForwardRay(length)
+          ray.origin.addInPlace(ray.direction.scale(0.5));
+          mesh.updateMeshPositions((p) => {            
+            let source = ray.origin,
+                target = ray.origin.add(ray.direction.scale(length));
+            p[0] = source.x;p[1] = source.y;p[2] = source.z;
+            p[3] = target.x;p[4] = target.y;p[5] = target.z;
+          }, false);
+        }
+      });
+    }
 
-    if (!hit || !hit.pickedMesh) {
+    if (!foundHit) {
       // draw cursor no selection
       this._cursor.position = this._camera.getFrontPosition(length);
 
@@ -214,7 +238,12 @@ class Game {
         this.removeObjectHighlight(this._gazeTarget);
         this._gazeTarget.mesh = undefined;
       }
-    } else {
+    }
+  }
+
+  tryHit(ray:BABYLON.Ray) : boolean {
+    var hit = this._scene.pickWithRay(ray, null);
+    if (hit && hit.pickedMesh) {
       // selection cursor
       this._cursor.position = hit.pickedPoint;
 
@@ -229,7 +258,10 @@ class Game {
         this._gazeTarget.mesh = mesh
         this.addObjectHighlight(this._gazeTarget);
       }
+
+      return true;
     }
+    return false;
   }
 
   removeObjectHighlight(selectedObject) {
@@ -290,7 +322,6 @@ class Game {
     this._space = new Space();
     console.log('space is');
     console.log(this._space);
-
 
     var headset = null;
     // If a VR headset is connected, get its info
@@ -460,6 +491,17 @@ class Game {
         index++
       })
     }
+
+    
+    // Create some debug lines
+    this.gazeMesh = {
+      gazeleft: BABYLON.Mesh.CreateLines("gaze-left", [BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, -10, 0)], this._scene, true),
+      gazeright: BABYLON.Mesh.CreateLines("gaze-right", [BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, 0, -10)], this._scene, true)
+    }
+    this.gazeMesh.gazeleft.color = new BABYLON.Color3(1,0,0);
+    this.gazeMesh.gazeleft.isPickable = false;
+    this.gazeMesh.gazeright.color = new BABYLON.Color3(0,1,0);
+    this.gazeMesh.gazeright.isPickable = false;
 
   }
 
