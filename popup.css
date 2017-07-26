@@ -1,5 +1,96 @@
+<<<<<<< Updated upstream
+=======
+/* body
+{
+    background-color:#F2F2F2;
+} */
+
+button
+{
+    background-color:transparent;
+    border:none;
+    font-family: "Segoe UI";
+    font-size: 1.1em;
+}
+
+>>>>>>> Stashed changes
 #main
 {
     height: 400px;
     width: 300px;
+<<<<<<< Updated upstream
+=======
+    background-color:#F2F2F2;
+}
+
+#your-space
+{
+    font-family: "Segoe UI Semibold";
+    font-size:1.5em;
+}
+.bottom-buttons
+{
+    background: none;
+}
+#delete
+{
+    float:right;
+}
+#share
+{
+    float:right;
+    padding-right:10px;
+}
+#view
+{
+    margin-left: -5px;
+}
+#launch-vr
+{
+    padding-left:0;
+}
+#content
+{
+    display:none;
+    background-color:lightgray;
+    padding-left: 10%;
+    padding-right:10%;
+    text-align: center;
+}
+#screenshot{
+    display:none;
+}
+.content-text
+{
+    font-family: "Segoe UI";
+    font-size:1.1em;
+    color:gray;
+}
+
+.content-text-small
+{
+    font-size: 1em;
+}
+
+#right-click-icon
+{
+    height:100px;
+    width:100px;
+    filter:opacity(20%);
+}
+#new-tab-icon
+{
+    padding-right: 5px;
+    height:30px;
+    width:30px;
+    float:left;
+}
+#web-vr-icon
+{
+    padding-top:5px;
+    padding-right:5px;
+    height:20px;
+    width:30px;
+    float:left;
+>>>>>>> Stashed changes
 }

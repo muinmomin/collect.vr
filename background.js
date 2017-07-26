@@ -39,6 +39,40 @@
             window.document.body.appendChild(button);
       })
       
+      function urlToBase64(url, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                  var reader = new FileReader();
+                  reader.onloadend = function () {
+                        callback(reader.result);
+                  }
+                  reader.readAsDataURL(xhr.response);
+            };
+            xhr.open('GET', url);
+            xhr.responseType = 'blob';
+            xhr.send();
+      }
+
+      browser.browserAction.onClicked.addListener((info) => {
+            // alert('browserAction is working');
+            // alert('found jquery ' + $("body").toString());
+            browser.tabs.query({active:true}, function(tabs){
+                  var tabId = tabs[0].id;
+                  browser.tabs.executeScript(tabId, {file: "docs/assets/jquery-1.12.4.min.js"}, function(){
+                        browser.tabs.executeScript(tabId, {file:"docs/flyout.js"})
+                  });
+
+                  // browser.tabs.executeScript({
+                  //       code: 'document.body.style.backgroundColor="red"'
+                  // });
+
+                  // browser.tabs.executeScript(tabId, {
+                  //       code: 'var div=window.document.createElement("div"),button=window.document.createElement("button"),text=window.document.createTextNode("test");button.appendChild(text),div.appendChild(button),div.style.cssText="position:fixed; right:5%; top:5%",window.document.body.appendChild(div);'
+                  // });
+
+            })
+      })
+>>>>>>> Stashed changes
       // Captures data from right click and saves to local storage.
       browser.contextMenus.onClicked.addListener((info, tab) => {
 
