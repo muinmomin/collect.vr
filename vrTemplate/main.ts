@@ -321,7 +321,7 @@ class Game {
       if (eventArg.key == ' ') {
         this.toggleZoomObjectMode();
       }
-      if ((eventArg.keyCode == 85 || eventArg.keyCode == 74) && this._gazeTarget) {
+      if ((eventArg.keyCode == 85 || eventArg.keyCode == 89) && this._gazeTarget) {
         var mesh: BABYLON.AbstractMesh = this._gazeTarget.mesh;
         while (mesh.parent != null) {
           var other: any = mesh.parent
@@ -350,7 +350,7 @@ class Game {
         this.rotationYState = 1;
       }
       var o:CollectedObject = this._space._objectMap[this._gazeTarget.mesh.name]
-
+      console.log(this._gazeTarget.mesh.name)
       if (eventArg.keyCode == 73) { //up aka w
         o.setPosition(o.pos.x,o.pos.y+1)
       }
@@ -420,7 +420,7 @@ class Game {
     //var index = 
     console.log(this._space._objectMap)
     for (var key in this._space._objectMap) {
-      var o:CollectedObject = this._space._objectMap[key]
+      let o:CollectedObject = this._space._objectMap[key]
 
       console.log(o);
       var index = 0
