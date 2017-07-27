@@ -10,6 +10,7 @@ class CollectedObject {
   }
   mesh: BABYLON.Mesh
   COLLECTION_KEY = 'collections';
+  userAdjustedRotation: boolean;
 
   constructor(public fileType: string, public src: string) {
     this.pos = {x:0,y:0,z:0}
@@ -33,7 +34,9 @@ class CollectedObject {
 
         //Scale to be same size
         
-        m.lookAt(new BABYLON.Vector3(0, 1, 0))
+        if (!this.userAdjustedRotation) {
+          m.lookAt(new BABYLON.Vector3(0, 1, 0))
+        }
   }
   // Override local getter and setter 
 
@@ -78,12 +81,6 @@ class Space {
         this._objectMap[collectedObject.uniqueID] = collectedObject;  
       });   
     }
-    
-    // var fileNames = ["Atom01.glb", "Globe.glb", "Calculator.glb", "gallium.png", "Ship.glb"];
-    // fileNames.forEach(fileName => {
-    //   var collectedObject = new CollectedObject("3D", "http://muin.me/collect.vr/assets/Molecule.glb")
-    //   this._objectMap[collectedObject.uniqueID] = collectedObject;  
-    // });    
   }
 
   // TODO: override default getter and setter.
@@ -100,6 +97,7 @@ class Game {
   private _cursor: BABYLON.Mesh;
   private _gazeTarget: SelectedObject;  //this is the mesh within the current gaze. undefined if no object
   private objectJump = .8;  //distance in meters for controls u/j to move the gazeTarget
+  static rotationAmount = 0.08; //controls the speed of object rotation
   private rotationXState = 0; //1=up, 0=nothing, -1=down
   private rotationYState = 0; //1=right, 0=nothing, -1=left
   private ray: BABYLON.Ray; //the gaze's raycast
@@ -626,23 +624,25 @@ var hl = new BABYLON.HighlightLayer("hl1", selectedObject);
        * future work: creating a center point within the bounding box of the mesh for the mesh to rotate around
        */
       if (this._gazeTarget.mesh && (this.rotationXState != 0 || this.rotationYState != 0)) {
+        this._space._objectMap[this._gazeTarget.mesh.name].userAdjustedRotation = true;
+
         var forward = this.ray.direction;
         let up = BABYLON.Vector3.Cross(BABYLON.Vector3.Cross(new BABYLON.Vector3(0, 1, 0), forward), forward)
         let side = BABYLON.Vector3.Cross(forward, up);
         if (this.rotationXState == 1) {
-          this._gazeTarget.mesh.rotate(side, .105, BABYLON.Space.WORLD);
+          this._gazeTarget.mesh.rotate(side, Game.rotationAmount, BABYLON.Space.WORLD);
 
         }
         if (this.rotationXState == -1) {
-          this._gazeTarget.mesh.rotate(side, -.105, BABYLON.Space.WORLD);
+          this._gazeTarget.mesh.rotate(side, -Game.rotationAmount, BABYLON.Space.WORLD);
 
         }
         if (this.rotationYState == 1) {
-          this._gazeTarget.mesh.rotate(up, .105, BABYLON.Space.WORLD);
+          this._gazeTarget.mesh.rotate(up, Game.rotationAmount, BABYLON.Space.WORLD);
 
         }
         if (this.rotationYState == -1) {
-          this._gazeTarget.mesh.rotate(up, -.105, BABYLON.Space.WORLD);
+          this._gazeTarget.mesh.rotate(up, -Game.rotationAmount, BABYLON.Space.WORLD);
 
         }
       }
